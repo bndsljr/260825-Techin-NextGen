@@ -1,0 +1,4 @@
+external_id,name,teacher,room,day_of_week,start_time,end_time,week_parity,term,category
+MATH-001,数学,王老师,A-301,1,08:00,08:45,all,2026-Fall,required
+ENG-002,英语,李老师,,周二,9:00,09:45,双周,2026-Fall,elective
+ROBOT-CLUB,机器人社,,科技楼-202,7,15:30,17:00,all,2026-Fall,club

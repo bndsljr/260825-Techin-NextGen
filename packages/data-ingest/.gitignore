@@ -1,0 +1,7 @@
+node_modules/
+.npm-cache/
+*.tsbuildinfo
+scripts/.credentials.json
+scripts/.scratch/
+scripts/__pycache__/
+*.pyc
