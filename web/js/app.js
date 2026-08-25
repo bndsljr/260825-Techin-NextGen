@@ -111,43 +111,37 @@
     const hasChildren = children.length > 0;
     const isCollapsed = collapsedTreeNodes.has(node.id);
 
-    const typeIcons = {
-      vision: "🌟",
-      long_term_goal: "🎯",
-      short_term_goal: "⛳",
-      task: "📋",
-      interest: "💡",
-      note: "📝"
-    };
-    const icon = typeIcons[node.type] || "📌";
-
     const collapseBtn = hasChildren
       ? `<button class="tree-toggle-btn" data-toggle-tree="${node.id}" title="${isCollapsed ? '展开子节点' : '折叠子节点'}">${isCollapsed ? '▶' : '▼'}</button>`
-      : `<span class="tree-icon-holder">${icon}</span>`;
+      : `<span class="tree-icon-holder"><span class="node-bullet-check" style="color:var(--text-faint);font-size:16px">○</span></span>`;
+
+    const statusPill = `
+      <select class="status-pill ${node.status}" data-status-node="${node.id}">
+        <option value="in_progress" ${node.status === "in_progress" ? "selected" : ""}>🔄 进行中</option>
+        <option value="pending" ${node.status === "pending" ? "selected" : ""}>⏳ 待定</option>
+        <option value="achieved" ${node.status === "achieved" ? "selected" : ""}>✅ 已达成</option>
+        <option value="abandoned" ${node.status === "abandoned" ? "selected" : ""}>🚫 已放弃</option>
+      </select>
+    `;
 
     let html = `
       <div class="tree-node-wrapper level-${level}" id="tree-node-${node.id}">
         <div class="tree-node-card status-${node.status}">
           <div class="tree-node-top">
-            ${collapseBtn}
-            <div class="tree-node-header-info">
-              <div class="tree-node-type-badge">${esc(typeLabel[node.type] || node.type)}</div>
-              <div class="tree-node-title">${esc(node.title)}</div>
+            <div class="tree-node-lead">
+              ${collapseBtn}
+              <div class="tree-node-header-info">
+                <span class="tree-node-type-badge">${esc(typeLabel[node.type] || node.type)}</span>
+                <span class="tree-node-title">${esc(node.title)}</span>
+                ${node.description ? `<div class="tree-node-desc">${esc(node.description)}</div>` : ""}
+                ${node.ai_note ? `<div class="tree-node-ai-note">💡 ${esc(node.ai_note)}</div>` : ""}
+              </div>
             </div>
-            <div class="tree-node-status-badge">
-              <select class="node-status-select" data-status-node="${node.id}">
-                <option value="in_progress" ${node.status === "in_progress" ? "selected" : ""}>🔄 进行中</option>
-                <option value="pending" ${node.status === "pending" ? "selected" : ""}>⏳ 待定</option>
-                <option value="achieved" ${node.status === "achieved" ? "selected" : ""}>✅ 已达成</option>
-                <option value="abandoned" ${node.status === "abandoned" ? "selected" : ""}>🚫 已放弃</option>
-              </select>
-            </div>
+            ${statusPill}
           </div>
-          ${node.description ? `<div class="tree-node-desc">${esc(node.description)}</div>` : ""}
-          ${node.ai_note ? `<div class="tree-node-ai-note">💡 ${esc(node.ai_note)}</div>` : ""}
           <div class="tree-node-actions">
-            <button class="where-btn sm" data-edit="${node.id}">✏️ 编辑</button>
-            <button class="where-btn sm mentor-q-btn" data-qnode="${node.id}">✨ 问导师</button>
+            <button class="where-btn" data-edit="${node.id}">✏️ 编辑</button>
+            <button class="where-btn mentor-q-btn" data-qnode="${node.id}">✨ 问导师</button>
           </div>
         </div>
     `;
@@ -163,6 +157,7 @@
     html += `</div>`;
     return html;
   }
+
 
   function bindLifePathActions() {
     const add = $("#addNode");
@@ -682,9 +677,18 @@
       const grid = INTERESTS.map((i) => '<button class="interest-card' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-is="' + i.slug + '"><span class="emo">' + i.emoji + "</span>" + i.label + "</button>").join("");
       return '<div class="interest-grid">' + grid + "</div>";
     }
-    if (ob.step === 1) return '<textarea id="obThought" rows="6" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:14px" placeholder="例如：我想做点有实际影响的事，但方向还不确定……">' + esc(ob.thought) + "</textarea>";
-    return '<div class="ob-note" style="margin-top:0;background:var(--oxford-soft);color:var(--oxford)">以下为 AI 建议草稿，不代表你的最终路径。没想好的节点标为「待定」。</div>' +
-      (ob.draft.map((n, i) => '<div class="draft-node"><div class="dn-main"><div class="dn-type">' + esc(typeLabel[n.type] || n.type) + (n.status === "pending" ? ' · <span class="tag warn">待定</span>' : "") + '</div><div class="dn-title">' + esc(n.title) + "</div></div><div class='dn-actions'><button class='btn sm ghost' data-up=" + i + ">↑</button><button class='btn sm ghost' data-down=" + i + ">↓</button></div></div>").join(""));
+  function obStepContent() {
+    if (ob.step === 0) {
+      const grid = INTERESTS.map((i) => '<button class="interest-card' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-is="' + i.slug + '"><span class="emo">' + i.emoji + "</span>" + i.label + "</button>").join("");
+      return '<div class="interest-grid">' + grid + "</div>";
+    }
+    if (ob.step === 1) return '<textarea id="obThought" rows="6" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:14px" placeholder="例如：我想动手做出能解决真实校园场景痛点的硬件或AI作品……">' + esc(ob.thought) + "</textarea>";
+    return '<div class="ob-note" style="margin-top:0;background:var(--oxford-soft);color:var(--oxford)">🤖 以下为 AI 结合你的 32 节周课表（含周五容光楼工程选修、数学Ⅲ-4等）智能推导的层级规划草案。</div>' +
+      '<div style="max-height:48vh;overflow-y:auto;margin-top:10px;padding:4px">' +
+      (ob.draft.map((n, i) => {
+        const indent = n.parent_id ? (n.type === "task" ? "margin-left:36px;border-left:2px solid rgba(163,28,46,.25);padding-left:10px" : "margin-left:18px;border-left:2px solid rgba(163,28,46,.25);padding-left:10px") : "";
+        return '<div class="draft-node" style="' + indent + '"><div class="dn-main"><div class="dn-type">' + esc(typeLabel[n.type] || n.type) + (n.status === "pending" ? ' · <span class="tag warn">待定</span>' : "") + '</div><div class="dn-title">' + esc(n.title) + '</div>' + (n.ai_note ? '<div style="font-size:11.5px;color:#4c5fe4;margin-top:2px">💡 ' + esc(n.ai_note) + '</div>' : '') + '</div></div>';
+      }).join("")) + '</div>';
   }
   function bindOb() {
     if (ob.step === 0) {
@@ -699,52 +703,135 @@
       const ta = $("#obThought");
       if (ta) ta.addEventListener("input", (e) => (ob.thought = e.target.value));
     }
-    if (ob.step === 2) {
-      document.querySelectorAll("[data-up]").forEach((b) => (b.onclick = () => obMove(+b.dataset.up, -1)));
-      document.querySelectorAll("[data-down]").forEach((b) => (b.onclick = () => obMove(+b.dataset.down, +1)));
-    }
     const back = $("#obBack"); if (back) back.onclick = () => { ob.step--; renderObStep(); };
     const next = $("#obNext"); if (next) next.onclick = () => { if (ob.step === 1) generateDraft(); ob.step++; renderObStep(); };
     const finish = $("#obFinish"); if (finish) finish.onclick = finishOnboarding;
   }
-  function obMove(i, dir) {
-    const j = i + dir;
-    if (j < 0 || j >= ob.draft.length) return;
-    const tmp = ob.draft[i]; ob.draft[i] = ob.draft[j]; ob.draft[j] = tmp;
-    renderObStep();
-  }
   function generateDraft() {
-    const drafts = [];
-    const vt = (ob.thought || "成为能解决真实问题的人").slice(0, 24).replace(/[。，.!?`·]/g, "");
-    drafts.push({ type: "vision", title: vt || "成为更好的自己", status: "in_progress" });
-    drafts.push({ type: "long_term_goal", title: "高三前完成一个有影响的项目", status: "in_progress" });
-    ob.interests.forEach((sl) => {
-      const i = INTERESTS.find((x) => x.slug === sl);
-      if (i) drafts.push({ type: "interest", title: i.label + "·兴趣板块", status: "in_progress" });
-    });
-    drafts.push({ type: "short_term_goal", title: "期末选定一个方向课题", status: "pending" });
-    drafts.push({ type: "long_term_goal", title: "升学方向：待定", status: "pending" });
-    ob.draft = (ob.draft && ob.draft.length) ? ob.draft : drafts;
+    const visionId = "node-vision-1";
+    const lt1Id = "node-lt-1";
+    const lt2Id = "node-lt-2";
+    const st1Id = "node-st-1";
+    const st2Id = "node-st-2";
+    const st3Id = "node-st-3";
+
+    const customVision = ob.thought ? ob.thought.slice(0, 36).replace(/[。，.!?`·]/g, "") : "";
+
+    ob.draft = [
+      {
+        id: visionId,
+        parent_id: null,
+        type: "vision",
+        title: customVision || "成为兼具工程落地能力与跨学科创造力的科技创造者",
+        description: "依托十一学校丰富的选修课程与工坊资源，兼顾算法深度与工程实现。",
+        status: "in_progress",
+        ai_note: "依据：云平台 32 节周课表，兼顾工程实践与数理底座",
+      },
+      {
+        id: lt1Id,
+        parent_id: visionId,
+        type: "long_term_goal",
+        title: "高二下学期前在容光楼工坊完成「工程-创意万物造」软硬件一体化创新项目",
+        description: "结合微控制器、传感器与交互软件，做出能解决真实校园场景痛点的作品。",
+        status: "in_progress",
+        ai_note: "依据：周五 14:25-18:00 容光楼T109 连续 3 节工程选修实践时段",
+      },
+      {
+        id: lt2Id,
+        parent_id: visionId,
+        type: "long_term_goal",
+        title: "高三前确定大学理工与跨学科探索方向（计算机工程 + 智能制造）",
+        description: "目前在纯软件算法与软硬件结合方向之间探索，细分申请方向待定。",
+        status: "pending",
+        ai_note: "导师提示：可在高一暑假参加高校科研夏令营实地体验",
+      },
+      {
+        id: st1Id,
+        parent_id: lt1Id,
+        type: "short_term_goal",
+        title: "高一上学期系统掌握数学Ⅲ-4、物理ⅢA-2 核心模型并应用于工程实践",
+        description: "筑牢理科数理底座，为后续算法设计与受力分析打下坚实基础。",
+        status: "in_progress",
+        ai_note: "依据：周课表重点主修科目",
+      },
+      {
+        id: st2Id,
+        parent_id: lt1Id,
+        type: "short_term_goal",
+        title: "在周五容光楼工坊实践中完成自主避障机器人软硬件搭建与调试",
+        description: "利用周五下午 3 节连堂时间，完成底盘机械结构安装与控制板烧录。",
+        status: "achieved",
+        ai_note: "依据：容光楼工程工坊实践进展",
+      },
+      {
+        id: st3Id,
+        parent_id: lt2Id,
+        type: "short_term_goal",
+        title: "高一下学期选修与国际竞赛申报方向探索",
+        description: "评估学科竞赛与科研项目的时间精力分配，视期末成绩再做最终定夺。",
+        status: "pending",
+        ai_note: "由导师在学业分析对话中启发提出",
+      },
+      {
+        id: "node-task-1",
+        parent_id: st1Id,
+        type: "task",
+        title: "完成数学Ⅲ-4 空间曲面方程解析与课堂微汇报",
+        description: "准备周三第 6 节数学课堂的交互演示与结论陈述。",
+        status: "in_progress",
+        ai_note: "依据：数学Ⅲ-4（S218A 教室）周中课堂任务",
+      },
+      {
+        id: "node-task-2",
+        parent_id: st1Id,
+        type: "task",
+        title: "整理周五「工程-创意万物造-1」容光楼T109 工坊工具清单与物料",
+        description: "提前备齐电机驱动模块、杜邦线与 3D 打印结构件。",
+        status: "in_progress",
+        ai_note: "依据：周五工坊实践物资准备",
+      }
+    ];
   }
   function finishOnboarding() {
     const d = store.get();
     if (!ob.draft.length) generateDraft();
-    d.path.nodes = ob.draft.map((n, i) => ({ id: uid(), parent_id: null, type: n.type, title: n.title, description: "", status: n.status, created_at: now(), updated_at: now(), order: i, source: "user", due_at: null, completed_at: n.status === "achieved" ? now() : null, ai_note: null }));
+    d.path.nodes = ob.draft.map((n, i) => ({
+      id: n.id || uid(),
+      parent_id: n.parent_id || null,
+      type: n.type,
+      title: n.title,
+      description: n.description || "",
+      status: n.status,
+      created_at: now(),
+      updated_at: now(),
+      order: i,
+      source: "user",
+      due_at: null,
+      completed_at: n.status === "achieved" ? now() : null,
+      ai_note: n.ai_note || null
+    }));
     d.user.interests = ob.interests.slice();
     d.isOnboardingCompleted = true;
     store.persist();
     $("#onboardingOverlay").classList.add("hidden");
     S.seg = "path";
     setTab(0);
-    persistToast("🎉 欢迎！你的人生路径档案已就绪。", true);
+    persistToast("🎉 欢迎！已基于真实课表为你生成层级人生路径。", true);
   }
 
   /* ---------- Init ---------- */
   function init() {
     renderShell();
     const d = store.get();
-    if (!d.isOnboardingCompleted) { openOnboarding(); return; }
+    // 强校验：如果节点包含旧版平铺（如"清华"或"兴趣板块"或全为根节点且超过3个），自动重置为最新的课表推导层级树
+    if (d.path && d.path.nodes && (
+        d.path.nodes.some(n => n.title.includes("清华") || n.title.includes("兴趣板块")) ||
+        (d.path.nodes.length > 3 && d.path.nodes.every(n => !n.parent_id))
+    )) {
+      store.reset();
+    }
     setTab(0);
   }
+
   window.addEventListener("DOMContentLoaded", init);
 })();

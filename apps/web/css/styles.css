@@ -151,28 +151,33 @@ ul { list-style: none; }
 
 /* ---------- Life path tree (层次化树状视图，对齐 iOS 端) ---------- */
 .section-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
-.tree-root-container { display: flex; flex-direction: column; gap: 14px; }
-.tree-node-wrapper { position: relative; margin-bottom: 10px; }
-.tree-children-container { margin-left: 20px; padding-left: 14px; border-left: 2px solid rgba(163,28,46,.18); margin-top: 10px; display: flex; flex-direction: column; gap: 10px; position: relative; }
-.tree-node-card { background: var(--card-bg); border: 1px solid rgba(163,28,46,.08); border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.03); transition: all .15s ease; }
-.tree-node-card:hover { border-color: rgba(163,28,46,.25); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
-.tree-node-card.status-pending { border: 1.5px dashed var(--pending); background: linear-gradient(180deg, #fffdf8, #ffffff); }
-.tree-node-card.status-achieved { border-color: rgba(39,174,96,.3); }
-.tree-node-top { display: flex; align-items: flex-start; gap: 10px; }
-.tree-toggle-btn { background: var(--crimson-soft); color: var(--crimson); border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-.tree-icon-holder { font-size: 15px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.tree-root-container { display: flex; flex-direction: column; gap: 16px; }
+.tree-node-wrapper { position: relative; }
+.tree-children-container { margin-left: 24px; padding-left: 16px; border-left: 2px solid rgba(163,28,46,.16); margin-top: 10px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+.tree-node-card { background: var(--card-bg); border: 1px solid rgba(163,28,46,.08); border-radius: 16px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(0,0,0,.03); transition: all .15s ease; }
+.tree-node-card:hover { border-color: rgba(163,28,46,.25); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+.tree-node-card.status-pending { border: 1.5px dashed #F5A524; background: linear-gradient(180deg, #fffdf8, #ffffff); }
+.tree-node-card.status-achieved { border-color: rgba(39,174,96,.35); background: linear-gradient(180deg, #fafffc, #ffffff); }
+.tree-node-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.tree-node-lead { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+.tree-toggle-btn { background: #A31C2E; color: #ffffff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; box-shadow: 0 2px 4px rgba(163,28,46,.25); }
+.tree-icon-holder { font-size: 14px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; color: var(--text-faint); }
 .tree-node-header-info { flex: 1; min-width: 0; }
-.tree-node-type-badge { display: inline-block; font-size: 11px; font-weight: 700; color: var(--text-soft); background: rgba(0,0,0,.05); border-radius: 999px; padding: 2px 8px; margin-bottom: 4px; }
-.tree-node-title { font-size: 15px; font-weight: 700; color: var(--text-main); line-height: 1.35; }
-.tree-node-desc { font-size: 13px; color: var(--text-soft); margin-top: 6px; line-height: 1.5; }
+.tree-node-type-badge { display: inline-block; font-size: 11px; font-weight: 700; color: var(--text-soft); background: rgba(0,0,0,.05); border-radius: 999px; padding: 2px 8px; margin-right: 6px; }
+.tree-node-title { display: inline; font-size: 15.5px; font-weight: 700; color: var(--text-main); line-height: 1.4; }
+.tree-node-desc { font-size: 13px; color: var(--text-soft); margin-top: 6px; line-height: 1.55; }
 .tree-node-ai-note { font-size: 12px; background: rgba(76,95,228,.08); color: #4c5fe4; border-radius: 8px; padding: 6px 10px; margin-top: 8px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
-.tree-node-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.04); }
-.node-status-select { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--card-bg); color: var(--text-main); cursor: pointer; }
-.node-status-select:focus { outline: none; border-color: var(--crimson); }
-.where-btn { border: 1px solid var(--line); background: var(--card-bg); border-radius: 8px; padding: 5px 10px; font-size: 12px; color: var(--text-main); font-weight: 600; cursor: pointer; transition: all .12s; }
-.where-btn:hover { background: rgba(0,0,0,.03); }
-.where-btn.mentor-q-btn { color: var(--mentorA); border-color: rgba(76,95,228,.2); background: rgba(76,95,228,.04); }
-.where-btn.mentor-q-btn:hover { background: rgba(76,95,228,.1); }
+.tree-node-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding-top: 8px; }
+.status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; flex-shrink: 0; }
+.status-pill.in_progress { background: rgba(76,95,228,.12); color: #4c5fe4; }
+.status-pill.pending { background: rgba(245,165,36,.14); color: #b87407; border: 1px dashed rgba(245,165,36,.4); }
+.status-pill.achieved { background: rgba(39,174,96,.12); color: #27ae60; }
+.status-pill.abandoned { background: rgba(0,0,0,.06); color: var(--text-soft); }
+.where-btn { border: none; background: transparent; padding: 4px 6px; font-size: 12.5px; color: var(--text-soft); font-weight: 600; cursor: pointer; transition: all .12s; display: inline-flex; align-items: center; gap: 4px; }
+.where-btn:hover { color: var(--text-main); }
+.where-btn.mentor-q-btn { color: #4c5fe4; font-weight: 600; }
+.where-btn.mentor-q-btn:hover { opacity: .8; }
+
 
 
 /* ---------- Schedule timeline (今日) ---------- */
