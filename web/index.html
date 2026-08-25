@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>十一校园助手 · BNDS Campus Companion</title>
+  <meta name="description" content="面向 BNDSer 的个人化校园信息中枢 —— 数据汇聚、日程驱动、AI 陪伴。" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn" aria-label="打开导航">☰</button>
+    <div class="brand"><span class="brand-mark">BNDS</span><span class="brand-name">十一校园助手</span></div>
+    <div class="topbar-user" id="topbarUser"></div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="brand-mark">BNDS</span>
+      <span class="brand-name">十一校园助手</span>
+    </div>
+    <div class="nav-label">主界面</div>
+    <ul class="nav-list" id="navList">
+      <li><a href="javascript:void(0)" data-tab="0" class="nav-link active"><span class="nav-ico">🙋</span><span class="nav-text">我</span></a></li>
+      <li><a href="javascript:void(0)" data-tab="1" class="nav-link"><span class="nav-ico">📅</span><span class="nav-text">今日</span></a></li>
+      <li><a href="javascript:void(0)" data-tab="2" class="nav-link"><span class="nav-ico">🧑‍🏫</span><span class="nav-text">导师</span></a></li>
+    </ul>
+    <div class="sidebar-foot" id="sidebarFoot"></div>
+  </nav>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <main class="main" id="main">
+    <section id="view" class="view"></section>
+  </main>
+
+  <div id="onboardingOverlay" class="overlay hidden"></div>
+  <div id="nodeEditorOverlay" class="overlay hidden"></div>
+  <div id="focusOverlay" class="overlay full hidden"></div>
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
