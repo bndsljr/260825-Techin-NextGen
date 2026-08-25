@@ -6,6 +6,7 @@ import Combine
 public final class AppState: ObservableObject {
     // 导航与路由
     @Published public var selectedTab: Int = 0 // 0: 我 (默认落点), 1: 今日, 2: 导师
+    @Published public var selectedWeekday: Int = 2 // 1: 周一, 2: 周二, 3: 周三, 4: 周四, 5: 周五, 6: 周六, 7: 周日
     @Published public var isOnboardingCompleted: Bool = true
 
     // 核心数据模型
@@ -18,6 +19,10 @@ public final class AppState: ObservableObject {
     @Published public var focusSessions: [FocusSession]
     @Published public var mentorMessages: [MentorMessage]
     @Published public var interestPillars: [InterestPillar]
+
+    // 云平台同步状态
+    @Published public var isSyncingCloud: Bool = false
+    @Published public var lastSyncedAt: String = "刚刚"
 
     // 模态弹窗与编辑态控制
     @Published public var isFocusModalPresented: Bool = false
@@ -36,6 +41,24 @@ public final class AppState: ObservableObject {
         self.focusSessions = store.focusSessions
         self.mentorMessages = store.mentorMessages
         self.interestPillars = store.interestPillars
+        self.lastSyncedAt = store.lastSyncedAt
+    }
+
+    // MARK: - 云平台数据同步
+
+    public func syncCloudData() {
+        isSyncingCloud = true
+        Task {
+            // 模拟同步网络延时与拉取
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            await MainActor.run {
+                MockDataStore.shared.syncFromCloudPlatform()
+                self.courses = MockDataStore.shared.courses
+                self.scheduleSlots = MockDataStore.shared.scheduleSlots
+                self.lastSyncedAt = MockDataStore.shared.lastSyncedAt
+                self.isSyncingCloud = false
+            }
+        }
     }
 
     // MARK: - 业务操作（人主导写操作）

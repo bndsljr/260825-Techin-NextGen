@@ -1,19 +1,19 @@
 import Foundation
 
 /// 统一数据模型 - 课程 / 课表条目 (Course)
-/// 对齐 docs/data-model.md § 2.4
+/// 对齐 docs/data-model.md § 2.4 与 packages/data-ingest NormalizedCourse
 public struct Course: Identifiable, Codable, Equatable, Sendable {
     public let id: String
     public var source: String             // "cloud" | "managebac" | "manual"
-    public var externalId: String?
-    public var name: String
-    public var teacher: String
-    public var room: String
+    public var externalId: String?        // 如 "fdd50ce3-...:33"
+    public var name: String               // 如 "生物ⅡA-4"
+    public var teacher: String            // 如 "李老师"
+    public var room: String               // 如 "S101A"
     public var dayOfWeek: Int             // 1-7
-    public var startTime: String          // "08:00"
-    public var endTime: String            // "08:45"
+    public var startTime: String          // "09:50"
+    public var endTime: String            // "10:35"
     public var weekParity: String         // "all" | "odd" | "even"
-    public var term: String               // "2026-Fall"
+    public var term: String               // "2026-2027学年上学期"
     public var category: String           // "required" | "elective" | "club" | "self_study"
 
     public init(
@@ -21,13 +21,13 @@ public struct Course: Identifiable, Codable, Equatable, Sendable {
         source: String = "cloud",
         externalId: String? = nil,
         name: String,
-        teacher: String,
-        room: String,
-        dayOfWeek: Int,
-        startTime: String,
-        endTime: String,
+        teacher: String = "待同步",
+        room: String = "未定教室",
+        dayOfWeek: Int = 1,
+        startTime: String = "08:00",
+        endTime: String = "08:45",
         weekParity: String = "all",
-        term: String = "2026-Fall",
+        term: String = "2026-2027学年上学期",
         category: String = "required"
     ) {
         self.id = id
@@ -42,6 +42,19 @@ public struct Course: Identifiable, Codable, Equatable, Sendable {
         self.weekParity = weekParity
         self.term = term
         self.category = category
+    }
+
+    public var dayOfWeekDisplayName: String {
+        switch dayOfWeek {
+        case 1: return "周一"
+        case 2: return "周二"
+        case 3: return "周三"
+        case 4: return "周四"
+        case 5: return "周五"
+        case 6: return "周六"
+        case 7: return "周日"
+        default: return "周\(dayOfWeek)"
+        }
     }
 
     enum CodingKeys: String, CodingKey {
@@ -90,19 +103,21 @@ public enum SlotKind: String, Codable, CaseIterable, Sendable {
 /// 对齐 docs/data-model.md § 2.5
 public struct ScheduleSlot: Identifiable, Codable, Equatable, Sendable {
     public let id: String
-    public var date: String               // "2026-09-01"
-    public var startAt: String            // ISO8601
-    public var endAt: String              // ISO8601
+    public var date: String               // "2026-08-25"
+    public var dayOfWeek: Int             // 1-7
+    public var startAt: String            // "08:00"
+    public var endAt: String              // "08:45"
     public var courseId: String?
     public var title: String
     public var subtitle: String?
     public var room: String?
     public var kind: SlotKind
-    public var source: String             // "schedule" | "focus"
+    public var source: String             // "cloud" | "managebac" | "manual" | "focus"
 
     public init(
         id: String = UUID().uuidString,
-        date: String,
+        date: String = "2026-08-25",
+        dayOfWeek: Int = 2,
         startAt: String,
         endAt: String,
         courseId: String? = nil,
@@ -110,10 +125,11 @@ public struct ScheduleSlot: Identifiable, Codable, Equatable, Sendable {
         subtitle: String? = nil,
         room: String? = nil,
         kind: SlotKind = .class,
-        source: String = "schedule"
+        source: String = "cloud"
     ) {
         self.id = id
         self.date = date
+        self.dayOfWeek = dayOfWeek
         self.startAt = startAt
         self.endAt = endAt
         self.courseId = courseId
@@ -127,6 +143,7 @@ public struct ScheduleSlot: Identifiable, Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id
         case date
+        case dayOfWeek = "day_of_week"
         case startAt = "start_at"
         case endAt = "end_at"
         case courseId = "course_id"

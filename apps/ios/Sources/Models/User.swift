@@ -1,11 +1,14 @@
 import Foundation
 
 /// 统一数据模型 - 用户实体
-/// 对齐 docs/data-model.md § 2.1
+/// 对齐 docs/data-model.md § 2.1 与云平台 profile
 public struct User: Identifiable, Codable, Equatable, Sendable {
     public let id: String
     public var name: String
     public var grade: Int
+    public var studyCode: String?         // 云平台学号，如 "26111422"
+    public var studentId: String?         // 云平台 student GUID
+    public var schoolPeriodName: String?  // 如 "2026-2027学年上学期"
     public var interests: [String]
     public var createdAt: String
     public var updatedAt: String
@@ -14,6 +17,9 @@ public struct User: Identifiable, Codable, Equatable, Sendable {
         id: String = UUID().uuidString,
         name: String,
         grade: Int = 10,
+        studyCode: String? = "26111422",
+        studentId: String? = "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+        schoolPeriodName: String? = "2026-2027学年上学期",
         interests: [String] = [],
         createdAt: String = ISO8601DateFormatter().string(from: Date()),
         updatedAt: String = ISO8601DateFormatter().string(from: Date())
@@ -21,6 +27,9 @@ public struct User: Identifiable, Codable, Equatable, Sendable {
         self.id = id
         self.name = name
         self.grade = grade
+        self.studyCode = studyCode
+        self.studentId = studentId
+        self.schoolPeriodName = schoolPeriodName
         self.interests = interests
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -30,6 +39,9 @@ public struct User: Identifiable, Codable, Equatable, Sendable {
         case id
         case name
         case grade
+        case studyCode = "study_code"
+        case studentId = "student_id"
+        case schoolPeriodName = "school_period_name"
         case interests
         case createdAt = "created_at"
         case updatedAt = "updated_at"

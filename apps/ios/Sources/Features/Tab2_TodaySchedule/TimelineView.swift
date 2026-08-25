@@ -8,19 +8,55 @@ public struct TimelineView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            // 星期切换器
+            WeekdayPickerView()
+
+            let currentDaySlots = appState.scheduleSlots.filter { $0.dayOfWeek == appState.selectedWeekday }
+
             HStack {
-                Text("日程时间轴")
-                    .font(.system(size: 17, weight: .bold))
+                Text("\(weekdayName(for: appState.selectedWeekday)) 课程表与时段")
+                    .font(.system(size: 16, weight: .bold))
                 Spacer()
-                Text("统一课表已同步 (云平台 & MB)")
+                Text("\(currentDaySlots.count) 个时段 · 云平台已归一化")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
             .padding(.horizontal, 4)
+            .padding(.top, 4)
 
-            ForEach(appState.scheduleSlots) { slot in
-                TimelineSlotRow(slot: slot)
+            if currentDaySlots.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "sun.max.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(BNDSColors.pending)
+                    Text("周末暂无排课，自由安排自主研修与社团活动")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 36)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(BNDSColors.cardBackground)
+                )
+            } else {
+                ForEach(currentDaySlots) { slot in
+                    TimelineSlotRow(slot: slot)
+                }
             }
+        }
+    }
+
+    private func weekdayName(for dow: Int) -> String {
+        switch dow {
+        case 1: return "星期一"
+        case 2: return "星期二"
+        case 3: return "星期三"
+        case 4: return "星期四"
+        case 5: return "星期五"
+        case 6: return "星期六"
+        case 7: return "星期日"
+        default: return "星期\(dow)"
         }
     }
 }
@@ -31,7 +67,7 @@ struct TimelineSlotRow: View {
     let slot: ScheduleSlot
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: 12) {
             // 时间栏
             VStack(alignment: .trailing, spacing: 2) {
                 Text(slot.startAt)
@@ -41,7 +77,7 @@ struct TimelineSlotRow: View {
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
-            .frame(width: 48)
+            .frame(width: 46)
 
             // 时段卡片
             HStack {
@@ -54,6 +90,10 @@ struct TimelineSlotRow: View {
                         Text(slot.title)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.primary)
+
+                        if slot.source == "cloud" {
+                            SourceBadge(source: "cloud")
+                        }
                     }
 
                     if let sub = slot.subtitle {

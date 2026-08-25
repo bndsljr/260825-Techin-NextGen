@@ -20,7 +20,7 @@ public struct GrowthLedgerView: View {
 
                 GrowthStatCard(
                     title: "主要课程均分",
-                    value: "95.1",
+                    value: "95.4",
                     subtitle: "年级前列",
                     iconName: "chart.line.uptrend.xyaxis",
                     color: BNDSColors.inProgress
@@ -57,6 +57,8 @@ public struct GrowthLedgerView: View {
 
                             Spacer()
 
+                            SourceBadge(source: assessment.source)
+
                             HStack(spacing: 4) {
                                 Image(systemName: assessment.dimension.iconName)
                                 Text(assessment.dimension.displayName)
@@ -85,7 +87,7 @@ public struct GrowthLedgerView: View {
                             Spacer()
 
                             Button(action: {
-                                let prompt = "请分析我在【\(assessment.courseName)】中李老师的评价：「\(assessment.comment)」，结合我的人生路径给出下一步学习策略。"
+                                let prompt = "请分析我在【\(assessment.courseName)】中云平台同步的教师评价：「\(assessment.comment)」，结合我的人生路径给出下一步学习策略。"
                                 appState.askMentorWithContext(contextTag: assessment.courseName, initialPrompt: prompt)
                             }) {
                                 HStack(spacing: 4) {
@@ -110,7 +112,7 @@ public struct GrowthLedgerView: View {
                 HStack {
                     Image(systemName: "chart.bar.fill")
                         .foregroundColor(BNDSColors.oxfordNavy)
-                    Text("近期阶段检测与成绩")
+                    Text("近期阶段检测与成绩 (云平台)")
                         .font(.system(size: 16, weight: .bold))
                     Spacer()
                 }
@@ -118,8 +120,11 @@ public struct GrowthLedgerView: View {
                 ForEach(appState.grades) { grade in
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(grade.courseName)
-                                .font(.system(size: 14, weight: .semibold))
+                            HStack(spacing: 6) {
+                                Text(grade.courseName)
+                                    .font(.system(size: 14, weight: .semibold))
+                                SourceBadge(source: grade.source)
+                            }
                             Text("\(grade.examName) · \(grade.examDate)")
                                 .font(.system(size: 12))
                                 .foregroundColor(.secondary)

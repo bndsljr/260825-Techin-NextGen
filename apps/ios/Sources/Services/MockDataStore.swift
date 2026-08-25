@@ -13,15 +13,19 @@ public final class MockDataStore: @unchecked Sendable {
     public private(set) var focusSessions: [FocusSession]
     public private(set) var mentorMessages: [MentorMessage]
     public private(set) var interestPillars: [InterestPillar]
+    public private(set) var lastSyncedAt: String
 
     private init() {
         let userId = "user-bnds-001"
 
-        // 1. 用户
+        // 1. 用户（结合云平台档案）
         self.currentUser = User(
             id: userId,
             name: "张博宇",
             grade: 10,
+            studyCode: "26111422",
+            studentId: "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+            schoolPeriodName: "2026-2027学年上学期",
             interests: ["cs", "math", "art", "robotics"]
         )
 
@@ -32,7 +36,7 @@ public final class MockDataStore: @unchecked Sendable {
             InterestPillar(id: "art", name: "艺术与交互设计", iconName: "paintpalette.fill", description: "UI/UX、数字艺术与视觉表达"),
             InterestPillar(id: "robotics", name: "创客与机器人", iconName: "gearshape.2.fill", description: "VEX 机器人、机械设计与自动化"),
             InterestPillar(id: "humanities", name: "人文与社会探索", iconName: "character.book.closed.fill", description: "社会学、哲学思辨与写作"),
-            InterestPillar(id: "athletics", name: "体能与户外运动", iconName: "figure.run", description: "飞盘、攀岩与体能挑战"),
+            InterestPillar(id: "athletics", name: "体能与户外运动", iconName: "figure.run", description: "飞盘、攀岩、皮划艇水上运动"),
             InterestPillar(id: "global", name: "全球视野与未来", iconName: "globe.asia.australia.fill", description: "国际交流、模拟联合国与跨文化")
         ]
 
@@ -74,7 +78,7 @@ public final class MockDataStore: @unchecked Sendable {
                     type: .longTermGoal,
                     title: "高三前确定跨学科大学申请方向 (CS + HCI 人机交互)",
                     description: "目前在纯算法研究与人机交互产品之间探索，待定细分方向。",
-                    status: .pending, // 待定：清晰可见一等公民
+                    status: .pending,
                     order: 2,
                     source: .user,
                     aiNote: "导师提示：高二寒假可对比两类实验室的研究风格"
@@ -105,7 +109,7 @@ public final class MockDataStore: @unchecked Sendable {
                     type: .shortTermGoal,
                     title: "申请 Stanford 在线学者计划 (SPICE)",
                     description: "准备文书与学术推荐信，视期末考试复习节奏再定是否投递。",
-                    status: .pending, // 待定
+                    status: .pending,
                     order: 5,
                     source: .aiSuggest,
                     aiNote: "由导师在学业分析对话中启发提出"
@@ -114,7 +118,7 @@ public final class MockDataStore: @unchecked Sendable {
                     id: "node-task-1",
                     parentId: shortTerm1Id,
                     type: .task,
-                    title: "完成微积分多变量极限章节探究报告",
+                    title: "完成数学Ⅲ-4 多变量函数探究报告",
                     description: "结合 Python 可视化曲线曲面，准备课堂陈述。",
                     status: .inProgress,
                     order: 6,
@@ -133,118 +137,116 @@ public final class MockDataStore: @unchecked Sendable {
             ]
         )
 
-        // 4. 课程
-        self.courses = [
-            Course(id: "c-math", name: "AP 微积分 (Calculus BC)", teacher: "王老师", room: "教学楼 A-301", dayOfWeek: 2, startTime: "08:00", endTime: "09:35", category: "required"),
-            Course(id: "c-cs", name: "IB 计算机科学 HL", teacher: "李老师", room: "实验楼 C-204", dayOfWeek: 2, startTime: "09:55", endTime: "11:30", category: "required"),
-            Course(id: "c-art", name: "现代艺术与人机交互设计", teacher: "陈老师", room: "艺术中心 B-102", dayOfWeek: 2, startTime: "13:30", endTime: "15:05", category: "elective"),
-            Course(id: "c-eng", name: "学术英语写作与批判性阅读", teacher: "Sarah Johnson", room: "综合楼 D-405", dayOfWeek: 2, startTime: "15:25", endTime: "16:10", category: "required"),
-            Course(id: "c-phy", name: "大学先修物理学", teacher: "赵老师", room: "实验楼 A-108", dayOfWeek: 3, startTime: "08:00", endTime: "09:35", category: "required")
-        ]
+        // 4. 课表与日程时段（从云平台真实 32 节课导入）
+        let cloudData = CloudIngestService.shared.loadCloudTimetable()
+        self.courses = cloudData.courses
+        self.scheduleSlots = cloudData.slots
+        self.lastSyncedAt = "刚刚"
 
-        // 5. 日程时段
-        let todayStr = "2026-08-25"
-        self.scheduleSlots = [
-            ScheduleSlot(id: "s-1", date: todayStr, startAt: "08:00", endAt: "09:35", courseId: "c-math", title: "AP 微积分 (Calculus BC)", subtitle: "王老师", room: "A-301", kind: .class),
-            ScheduleSlot(id: "s-2", date: todayStr, startAt: "09:35", endAt: "09:55", title: "大课间休息 & 导师答疑", kind: .break),
-            ScheduleSlot(id: "s-3", date: todayStr, startAt: "09:55", endAt: "11:30", courseId: "c-cs", title: "IB 计算机科学 HL", subtitle: "李老师", room: "C-204", kind: .class),
-            ScheduleSlot(id: "s-4", date: todayStr, startAt: "11:30", endAt: "13:30", title: "午餐 & 图书馆阅览", kind: .break),
-            ScheduleSlot(id: "s-5", date: todayStr, startAt: "13:30", endAt: "15:05", courseId: "c-art", title: "现代艺术与人机交互设计", subtitle: "陈老师", room: "B-102", kind: .class),
-            ScheduleSlot(id: "s-6", date: todayStr, startAt: "15:25", endAt: "16:10", courseId: "c-eng", title: "学术英语写作与批判性阅读", subtitle: "Sarah Johnson", room: "D-405", kind: .class),
-            ScheduleSlot(id: "s-7", date: todayStr, startAt: "16:30", endAt: "17:30", title: "放学后自主研修 · 深度专注", subtitle: "微积分作业与项目代码编写", room: "自习室 203", kind: .focus)
-        ]
-
-        // 6. 过程性评价
+        // 5. 过程性评价
         self.formativeAssessments = [
             FormativeAssessment(
                 id: "fa-1",
                 userId: userId,
-                courseId: "c-cs",
-                courseName: "IB 计算机科学 HL",
-                teacherName: "李老师",
+                courseId: "course-cloud-sx-1",
+                courseName: "数学Ⅲ-4",
+                teacherName: "数学教师",
                 dimension: .project,
                 gradeLevel: .excellent,
-                comment: "自主编写的校园日程解析归一化工具表现惊艳，代码结构清晰，兼顾了异常处理与类型安全。"
+                comment: "在多变量极限与曲面切平面的研讨环节中主动提出创新解法，逻辑缜密。",
+                source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-2",
                 userId: userId,
-                courseId: "c-math",
-                courseName: "AP 微积分 BC",
-                teacherName: "王老师",
+                courseId: "course-cloud-wl-1",
+                courseName: "物理ⅢA-2",
+                teacherName: "物理教师",
                 dimension: .participation,
                 gradeLevel: .excellent,
-                comment: "在多变量极限与曲面切平面的研讨环节中主动提出创新解法，逻辑缜密。"
+                comment: "实验动手能力强，电磁场仿真数据分析严谨准确。",
+                source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-3",
                 userId: userId,
-                courseId: "c-art",
-                courseName: "现代艺术与交互设计",
-                teacherName: "陈老师",
+                courseId: "course-cloud-gc-51",
+                courseName: "工程-创意万物造-1",
+                teacherName: "工程导师",
                 dimension: .homework,
                 gradeLevel: .excellent,
-                comment: "iOS 界面卡片与状态色调的微交互细节设计极具美感，符合人本设计原则。"
+                comment: "iOS 界面卡片与状态色调的微交互细节设计极具美感，符合人本设计原则。",
+                source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-4",
                 userId: userId,
-                courseId: "c-eng",
-                courseName: "学术英语写作",
-                teacherName: "Sarah Johnson",
+                courseId: "course-cloud-yy-1",
+                courseName: "高中英语Ⅱ-a3",
+                teacherName: "英语教师",
                 dimension: .conduct,
                 gradeLevel: .good,
-                comment: "Essay 论点清晰，论据充分，后续可在学术词汇多样性上进一步拓展。"
+                comment: "Essay 论点清晰，论据充分，学术交流表达流利。",
+                source: "cloud"
             )
         ]
 
-        // 7. 成绩
+        // 6. 成绩记录
         self.grades = [
-            Grade(id: "g-1", userId: userId, courseId: "c-cs", courseName: "IB 计算机科学 HL", examName: "阶段性项目机试", score: 98.0, examDate: "2026-10-12"),
-            Grade(id: "g-2", userId: userId, courseId: "c-math", courseName: "AP 微积分 BC", examName: "期中阶段检测", score: 96.0, examDate: "2026-10-18"),
-            Grade(id: "g-3", userId: userId, courseId: "c-art", courseName: "现代艺术与交互设计", examName: "中期原型大作业", score: 95.0, examDate: "2026-10-20"),
-            Grade(id: "g-4", userId: userId, courseId: "c-phy", courseName: "大学先修物理学", examName: "力学单元综合考", score: 91.5, examDate: "2026-10-08")
+            Grade(id: "g-1", userId: userId, courseId: "course-cloud-sx-1", courseName: "数学Ⅲ-4", examName: "阶段性检测", score: 98.0, source: "cloud"),
+            Grade(id: "g-2", userId: userId, courseId: "course-cloud-wl-1", courseName: "物理ⅢA-2", examName: "单元实验与测验", score: 96.0, source: "cloud"),
+            Grade(id: "g-3", userId: userId, courseId: "course-cloud-hx-1", courseName: "化学ⅡA-7", examName: "期中大作业", score: 95.0, source: "cloud"),
+            Grade(id: "g-4", userId: userId, courseId: "course-cloud-sw-2", courseName: "生物ⅡA-4", examName: "探究综合考", score: 92.5, source: "cloud")
         ]
 
-        // 8. 专注历史
+        // 7. 专注历史
         self.focusSessions = [
-            FocusSession(id: "f-1", userId: userId, goalTitle: "微积分作业与曲线探究", plannedDurationMin: 45, actualDurationMin: 45, status: .completed, reflectionNote: "效率极高，提前搞懂了切平面方程"),
-            FocusSession(id: "f-2", userId: userId, goalTitle: "iOS 状态管理与数据流重构", plannedDurationMin: 60, actualDurationMin: 55, status: .completed, reflectionNote: "梳理通了 3-Tab 状态生命周期")
+            FocusSession(id: "f-1", userId: userId, goalTitle: "数学作业与曲线探究", plannedDurationMin: 45, actualDurationMin: 45, status: .completed, reflectionNote: "效率极高，提前搞懂了切平面方程"),
+            FocusSession(id: "f-2", userId: userId, goalTitle: "iOS 云平台课表数据流对接", plannedDurationMin: 60, actualDurationMin: 55, status: .completed, reflectionNote: "打通了云平台 32 节课星期时间轴")
         ]
 
-        // 9. 导师消息与结构化建议卡
+        // 8. 导师消息与结构化建议卡
         self.mentorMessages = [
             MentorMessage(
                 id: "m-1",
                 sender: "mentor",
-                content: "你好博宇！我是你的学业与人生规划导师。在这里，我会基于你的日常课表、成长评价与人生路径提供个性化参考与分析。\n\n记住：我们共同探讨可能，但每一次规划与选择，**决定权始终由你自己拍板**。"
+                content: "你好博宇！我是你的学业与人生规划导师。已为你接入**十一学校云平台**（共同步 32 节课程及学业档案）。\n\n记住：我们共同探讨可能，但每一次规划与选择，**决定权始终由你自己拍板**。"
             ),
             MentorMessage(
                 id: "m-2",
                 sender: "user",
-                content: "我最近在准备微积分探究报告，同时也在开发校园助手 iOS 端，时间感觉有点紧，下周目标该怎么平衡？"
+                content: "我看到周五下午有连续的【工程-创意万物造】，下周时间该怎么规划？"
             ),
             MentorMessage(
                 id: "m-3",
                 sender: "mentor",
-                content: "我分析了你近期的评价、成绩和日程安排：你的微积分当前保持 96 分且课堂评价卓越，说明基础非常扎实。反而是放学后的碎片时间可以更好地利用专注窗口聚焦在代码开发上。",
+                content: "云平台课表显示你周五 14:25 - 18:00 为整段工程选修时段（容光楼T109）。这非常适合整块时间进行原型动手实践，建议将前期的理论调研安排在周二或周三的自习时段。",
                 suggestion: MentorSuggestion(
                     id: "sug-1",
-                    title: "将【微积分探究报告可视化】合并到今天下午 16:30 专注时段",
-                    text: "建议今天下午 16:30 的专注时段前 30 分钟锁定微积分 Python 绘图，后 30 分钟进行 iOS 原型联调。",
-                    reason: "依据：今日下午有整段 60 分钟专注窗口；且两者均涉及计算机技能，结合执行心流更连贯，能有效减轻周五压力。",
+                    title: "将【创意万物造项目开发】集中于周五下午工程时段",
+                    text: "利用周五 14:25 - 18:00 的容光楼实验工坊，集中完成硬件装配与界面原型联调。",
+                    reason: "依据：云平台显示周五下午为 3 节连堂实践课，整块时间更易进入心流。",
                     targetNodeType: .task,
-                    proposedNodeTitle: "完成微积分可视化与 iOS 联调",
-                    proposedNodeDescription: "在 16:30 专注窗口内高效推进",
+                    proposedNodeTitle: "容光楼工程工坊实践",
+                    proposedNodeDescription: "周五下午集中推进原型",
                     source: "ai_suggest",
                     status: .pendingReview
                 ),
-                relatedContextTag: "学业与项目精力平衡"
+                relatedContextTag: "周五工程课表规划"
             )
         ]
     }
 
-    // MARK: - 业务操作方法（仅用户可直接修改状态）
+    // MARK: - 业务操作方法
+
+    public func syncFromCloudPlatform() {
+        let cloudData = CloudIngestService.shared.loadCloudTimetable()
+        self.courses = cloudData.courses
+        self.scheduleSlots = cloudData.slots
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        self.lastSyncedAt = formatter.string(from: Date())
+    }
 
     public func updateLifePathNode(_ updatedNode: LifePathNode) {
         if let idx = lifePath.nodes.firstIndex(where: { $0.id == updatedNode.id }) {

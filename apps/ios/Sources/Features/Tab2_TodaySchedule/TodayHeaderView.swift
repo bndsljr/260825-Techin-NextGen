@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 今日头部组件：日期 + 从人生路径提取的“今日目标条（含待定态支持）”
+/// 今日头部组件：日期 + 云平台同步状态 + 今日主线目标
 public struct TodayHeaderView: View {
     @EnvironmentObject var appState: AppState
 
@@ -11,29 +11,62 @@ public struct TodayHeaderView: View {
             // 日期与问候
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("2026 年 8 月 25 日 · 星期二")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.secondary)
-                    Text("今日行动与课表")
+                    HStack(spacing: 6) {
+                        Image(systemName: "cloud.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(BNDSColors.inProgress)
+                        Text("十一云平台同步 · \(appState.lastSyncedAt)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Text("课表与日程中枢")
                         .font(.system(size: 22, weight: .bold))
                 }
 
                 Spacer()
 
-                Button(action: {
-                    appState.isFocusModalPresented = true
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "timer")
-                        Text("进入专注")
+                HStack(spacing: 8) {
+                    // 同步云平台按钮
+                    Button(action: {
+                        appState.syncCloudData()
+                    }) {
+                        HStack(spacing: 4) {
+                            if appState.isSyncingCloud {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            Text(appState.isSyncingCloud ? "同步中" : "同步云平台")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule().fill(BNDSColors.inProgress.opacity(0.12))
+                        )
+                        .foregroundColor(BNDSColors.inProgress)
                     }
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(
-                        Capsule().fill(BNDSColors.crimson)
-                    )
+                    .disabled(appState.isSyncingCloud)
+
+                    // 专注按钮
+                    Button(action: {
+                        appState.isFocusModalPresented = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "timer")
+                            Text("专注")
+                        }
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule().fill(BNDSColors.crimson)
+                        )
+                    }
                 }
             }
 
@@ -60,7 +93,7 @@ public struct TodayHeaderView: View {
                     Spacer()
 
                     Button(action: {
-                        let prompt = "我在推进今日目标「\(activeGoal.title)」时，想了解课表时间分布是否合理。"
+                        let prompt = "我在推进今日目标「\(activeGoal.title)」时，想结合云平台下发的课表评估时间精力分配。"
                         appState.askMentorWithContext(contextTag: activeGoal.title, initialPrompt: prompt)
                     }) {
                         Image(systemName: "sparkles")
