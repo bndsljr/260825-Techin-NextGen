@@ -9,6 +9,7 @@
 | [data-model.md](./data-model.md) | 🔑 统一数据模型（字段、枚举、JSON 示例）—— 对接基石 |
 | [api-contract.md](./api-contract.md) | 后端统一 API 契约（REST + WebSocket）—— 客户端基准 |
 | [events.md](./events.md) | 模块间事件/消息契约（解耦与流程） |
+| [ux-ia.md](./ux-ia.md) | 🎨 界面信息架构与层级规范（iOS 3-Tab / Web 侧栏）—— 设计基准 |
 
 ## 各模块（按分工阅读）
 | 文档 | 对应模块 | 主要负责 |
@@ -20,8 +21,8 @@
 | [module-ai.md](./module-ai.md) | `packages/ai` | AI 大模型接入（辅助不越位） |
 
 ## 角色分工导览
-- **iOS 端**：读 `api-contract.md`（+ `data-model.md`），对接 `apps/api`。
-- **Web 端**：读 `api-contract.md`（+ `data-model.md`），对接 `apps/api`。
+- **iOS 端**：读 `api-contract.md` + `ux-ia.md`（+ `data-model.md`），对接 `apps/api`。
+- **Web 端**：读 `api-contract.md` + `ux-ia.md`（+ `data-model.md`），对接 `apps/api`。
 - **平台信息对接**：读 `module-data-ingest.md`。
 - **AI 大模型**：读 `module-ai.md` + `module-path.md` + `events.md`。
 
