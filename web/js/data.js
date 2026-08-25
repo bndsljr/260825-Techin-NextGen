@@ -5,7 +5,7 @@
  * ============================================================ */
 
 const BNDS = (function () {
-  const STORE_KEY = "bnds.store.v3";
+  const STORE_KEY = "bnds.store.v4";
 
   const uid = () =>
     (globalThis.crypto && crypto.randomUUID)

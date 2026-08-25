@@ -82,50 +82,134 @@
     bindGrowthActions();
   }
 
+  const collapsedTreeNodes = new Set();
+
   function renderPathBody(d) {
     const nodes = d.path.nodes.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
     const counts = { in_progress: 0, achieved: 0, pending: 0, abandoned: 0 };
     nodes.forEach((n) => (counts[n.status] = (counts[n.status] || 0) + 1));
-    const list = nodes.length
-      ? nodes.map((n) => nodeCardHTML(n)).join("")
-      : emptyBox("🧭", "还没有节点，点右上「添加节点」开始，或先走完 Onboarding");
-    return '<div class="card"><div class="card-head"><span class="card-title">人生路径</span><button class="btn sm" id="addNode">+ 添加节点</button></div>' +
-      '<div class="text-soft" style="font-size:13px;margin-bottom:14px">' +
+
+    // 寻找根节点 (无 parent_id 或 parent 不在列表中)
+    const rootNodes = nodes.filter((n) => !n.parent_id || !nodes.some((p) => p.id === n.parent_id));
+
+    const treeHTML = rootNodes.length
+      ? rootNodes.map((root) => renderTreeNodeHTML(root, nodes, 0)).join("")
+      : emptyBox("🧭", "还没有节点，点右上「新增节点」开始");
+
+    return '<div class="card"><div class="card-head"><div><span class="card-title">' + esc(d.path.title || "高一至高三全景探索与规划") + '</span><div style="font-size:12px;color:var(--text-soft);margin-top:2px">共 ' + nodes.length + ' 个规划节点 · 随时可调整或待定</div></div><button class="btn sm" id="addNode">+ 新增节点</button></div>' +
+      '<div class="text-soft" style="font-size:13px;margin:10px 0 16px">' +
       '<span class="tag primary">进行中 ' + counts.in_progress + '</span> ' +
       '<span class="tag accent">已达成 ' + counts.achieved + '</span> ' +
       '<span class="tag warn">待定 ' + counts.pending + '</span> ' +
       '<span class="tag muted">已放弃 ' + counts.abandoned + '</span></div>' +
-      '<div class="timeline">' + list + "</div></div>" +
+      '<div class="tree-root-container">' + treeHTML + "</div></div>" +
       '<div class="ob-note" style="background:var(--oxford-soft);color:var(--oxford)">🫵 状态四态平等，任何节点都可标「待定」、暂停或推翻；AI 永远只帮你梳理。</div>';
   }
 
-  function nodeCardHTML(n) {
-    const m = statusMeta[n.status] || {};
-    return '<div class="node-item ' + n.status + '"><div class="node-card">' +
-      '<div class="node-type">' + esc(typeLabel[n.type] || n.type) + "</div>" +
-      '<div class="node-title">' + esc(n.title) + "</div>" +
-      (n.description ? '<div class="node-desc">' + esc(n.description) + "</div>" : "") +
-      (n.ai_note ? '<div class="node-foot"><span class="note">AI 依据：' + esc(n.ai_note) + "</span></div>" : "") +
-      '<div class="node-foot">' + badge(n.status) +
-      (n.due_at ? '<span class="text-faint" style="font-size:12px">截止 ' + esc(n.due_at) + "</span>" : "") +
-      '<span style="margin-left:auto;display:flex;gap:8px">' +
-      '<button class="where-btn" data-qnode="' + n.id + '">🧑‍🏫 问导师</button>' +
-      '<button class="btn sm ghost" data-edit="' + n.id + '">编辑</button></span></div></div></div>';
+  function renderTreeNodeHTML(node, allNodes, level) {
+    const children = allNodes.filter((n) => n.parent_id === node.id);
+    const hasChildren = children.length > 0;
+    const isCollapsed = collapsedTreeNodes.has(node.id);
+
+    const typeIcons = {
+      vision: "🌟",
+      long_term_goal: "🎯",
+      short_term_goal: "⛳",
+      task: "📋",
+      interest: "💡",
+      note: "📝"
+    };
+    const icon = typeIcons[node.type] || "📌";
+
+    const collapseBtn = hasChildren
+      ? `<button class="tree-toggle-btn" data-toggle-tree="${node.id}" title="${isCollapsed ? '展开子节点' : '折叠子节点'}">${isCollapsed ? '▶' : '▼'}</button>`
+      : `<span class="tree-icon-holder">${icon}</span>`;
+
+    let html = `
+      <div class="tree-node-wrapper level-${level}" id="tree-node-${node.id}">
+        <div class="tree-node-card status-${node.status}">
+          <div class="tree-node-top">
+            ${collapseBtn}
+            <div class="tree-node-header-info">
+              <div class="tree-node-type-badge">${esc(typeLabel[node.type] || node.type)}</div>
+              <div class="tree-node-title">${esc(node.title)}</div>
+            </div>
+            <div class="tree-node-status-badge">
+              <select class="node-status-select" data-status-node="${node.id}">
+                <option value="in_progress" ${node.status === "in_progress" ? "selected" : ""}>🔄 进行中</option>
+                <option value="pending" ${node.status === "pending" ? "selected" : ""}>⏳ 待定</option>
+                <option value="achieved" ${node.status === "achieved" ? "selected" : ""}>✅ 已达成</option>
+                <option value="abandoned" ${node.status === "abandoned" ? "selected" : ""}>🚫 已放弃</option>
+              </select>
+            </div>
+          </div>
+          ${node.description ? `<div class="tree-node-desc">${esc(node.description)}</div>` : ""}
+          ${node.ai_note ? `<div class="tree-node-ai-note">💡 ${esc(node.ai_note)}</div>` : ""}
+          <div class="tree-node-actions">
+            <button class="where-btn sm" data-edit="${node.id}">✏️ 编辑</button>
+            <button class="where-btn sm mentor-q-btn" data-qnode="${node.id}">✨ 问导师</button>
+          </div>
+        </div>
+    `;
+
+    if (hasChildren && !isCollapsed) {
+      html += `
+        <div class="tree-children-container">
+          ${children.map((child) => renderTreeNodeHTML(child, allNodes, level + 1)).join("")}
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    return html;
   }
 
   function bindLifePathActions() {
     const add = $("#addNode");
     if (add) add.onclick = () => openNodeEditor(null);
+
+    // 折叠/展开
+    document.querySelectorAll("[data-toggle-tree]").forEach((b) => (b.onclick = (e) => {
+      e.stopPropagation();
+      const id = b.dataset.toggleTree;
+      if (collapsedTreeNodes.has(id)) {
+        collapsedTreeNodes.delete(id);
+      } else {
+        collapsedTreeNodes.add(id);
+      }
+      renderMe();
+    }));
+
+    // 状态切换
+    document.querySelectorAll("[data-status-node]").forEach((sel) => (sel.onchange = (e) => {
+      const id = sel.dataset.statusNode;
+      const newStatus = sel.value;
+      const d = store.get();
+      const n = d.path.nodes.find((x) => x.id === id);
+      if (n) {
+        n.status = newStatus;
+        n.source = "user";
+        if (newStatus === "achieved") n.completed_at = now();
+        store.persist();
+        persistToast("已更新状态为「" + (statusMeta[newStatus]?.label || newStatus) + "」", true);
+        renderMe();
+      }
+    }));
+
+    // 编辑
     document.querySelectorAll("[data-edit]").forEach((b) => (b.onclick = () => {
       const d = store.get();
       openNodeEditor(d.path.nodes.find((x) => x.id === b.dataset.edit));
     }));
+
+    // 问导师
     document.querySelectorAll("[data-qnode]").forEach((b) => (b.onclick = () => {
       const d = store.get();
       const n = d.path.nodes.find((x) => x.id === b.dataset.qnode);
       if (n) askMentor("路径节点「" + n.title + "」", { kind: "node", node: n });
     }));
   }
+
 
   function renderGrowthBody(d) {
     const avg = gradeAvg(d.grades);
