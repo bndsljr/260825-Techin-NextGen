@@ -1,0 +1,371 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000002C70000100000001 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000002C70000100000001 /* AppState.swift */; };
+		A10000012C70000100000001 /* BNDSCompanionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000012C70000100000001 /* BNDSCompanionApp.swift */; };
+		A10000022C70000100000001 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000022C70000100000001 /* RootView.swift */; };
+		A10000032C70000100000001 /* MentorChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000032C70000100000001 /* MentorChatView.swift */; };
+		A10000042C70000100000001 /* PromptShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000042C70000100000001 /* PromptShortcutsView.swift */; };
+		A10000052C70000100000001 /* SuggestionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000052C70000100000001 /* SuggestionCardView.swift */; };
+		A10000062C70000100000001 /* GrowthLedgerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000062C70000100000001 /* GrowthLedgerView.swift */; };
+		A10000072C70000100000001 /* LifePathTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000072C70000100000001 /* LifePathTreeView.swift */; };
+		A10000082C70000100000001 /* NodeEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000082C70000100000001 /* NodeEditorSheet.swift */; };
+		A10000092C70000100000001 /* ProfileAndPathView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000092C70000100000001 /* ProfileAndPathView.swift */; };
+		A100000A2C70000100000001 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000A2C70000100000001 /* ProfileHeaderView.swift */; };
+		A100000B2C70000100000001 /* FocusModeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000B2C70000100000001 /* FocusModeModal.swift */; };
+		A100000C2C70000100000001 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000C2C70000100000001 /* TimelineView.swift */; };
+		A100000D2C70000100000001 /* TodayHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000D2C70000100000001 /* TodayHeaderView.swift */; };
+		A100000E2C70000100000001 /* TodayScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000E2C70000100000001 /* TodayScheduleView.swift */; };
+		A100000F2C70000100000001 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000F2C70000100000001 /* OnboardingFlowView.swift */; };
+		A10000102C70000100000001 /* Focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000102C70000100000001 /* Focus.swift */; };
+		A10000112C70000100000001 /* Growth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000112C70000100000001 /* Growth.swift */; };
+		A10000122C70000100000001 /* LifePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000122C70000100000001 /* LifePath.swift */; };
+		A10000132C70000100000001 /* Mentor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000132C70000100000001 /* Mentor.swift */; };
+		A10000142C70000100000001 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000142C70000100000001 /* Schedule.swift */; };
+		A10000152C70000100000001 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000152C70000100000001 /* User.swift */; };
+		A10000162C70000100000001 /* BNDSColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000162C70000100000001 /* BNDSColors.swift */; };
+		A10000172C70000100000001 /* BNDSTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000172C70000100000001 /* BNDSTypography.swift */; };
+		A10000182C70000100000001 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000182C70000100000001 /* GlassCard.swift */; };
+		A10000192C70000100000001 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000192C70000100000001 /* StatusBadge.swift */; };
+		A100001A2C70000100000001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001A2C70000100000001 /* APIClient.swift */; };
+		A100001B2C70000100000001 /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001B2C70000100000001 /* MockDataStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C10000012C70000100000001 /* BNDSCompanion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BNDSCompanion.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000002C70000100000001 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/App/AppState.swift"; sourceTree = "<group>"; };
+		B10000012C70000100000001 /* BNDSCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/App/BNDSCompanionApp.swift"; sourceTree = "<group>"; };
+		B10000022C70000100000001 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/App/RootView.swift"; sourceTree = "<group>"; };
+		B10000032C70000100000001 /* MentorChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab3_MentorChat/MentorChatView.swift"; sourceTree = "<group>"; };
+		B10000042C70000100000001 /* PromptShortcutsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab3_MentorChat/PromptShortcutsView.swift"; sourceTree = "<group>"; };
+		B10000052C70000100000001 /* SuggestionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab3_MentorChat/SuggestionCardView.swift"; sourceTree = "<group>"; };
+		B10000062C70000100000001 /* GrowthLedgerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/GrowthLedgerView.swift"; sourceTree = "<group>"; };
+		B10000072C70000100000001 /* LifePathTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/LifePathTreeView.swift"; sourceTree = "<group>"; };
+		B10000082C70000100000001 /* NodeEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/NodeEditorSheet.swift"; sourceTree = "<group>"; };
+		B10000092C70000100000001 /* ProfileAndPathView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/ProfileAndPathView.swift"; sourceTree = "<group>"; };
+		B100000A2C70000100000001 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/ProfileHeaderView.swift"; sourceTree = "<group>"; };
+		B100000B2C70000100000001 /* FocusModeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/FocusModeModal.swift"; sourceTree = "<group>"; };
+		B100000C2C70000100000001 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TimelineView.swift"; sourceTree = "<group>"; };
+		B100000D2C70000100000001 /* TodayHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayHeaderView.swift"; sourceTree = "<group>"; };
+		B100000E2C70000100000001 /* TodayScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayScheduleView.swift"; sourceTree = "<group>"; };
+		B100000F2C70000100000001 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Onboarding/OnboardingFlowView.swift"; sourceTree = "<group>"; };
+		B10000102C70000100000001 /* Focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Focus.swift"; sourceTree = "<group>"; };
+		B10000112C70000100000001 /* Growth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Growth.swift"; sourceTree = "<group>"; };
+		B10000122C70000100000001 /* LifePath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/LifePath.swift"; sourceTree = "<group>"; };
+		B10000132C70000100000001 /* Mentor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Mentor.swift"; sourceTree = "<group>"; };
+		B10000142C70000100000001 /* Schedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Schedule.swift"; sourceTree = "<group>"; };
+		B10000152C70000100000001 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/User.swift"; sourceTree = "<group>"; };
+		B10000162C70000100000001 /* BNDSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSColors.swift"; sourceTree = "<group>"; };
+		B10000172C70000100000001 /* BNDSTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSTypography.swift"; sourceTree = "<group>"; };
+		B10000182C70000100000001 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/GlassCard.swift"; sourceTree = "<group>"; };
+		B10000192C70000100000001 /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/StatusBadge.swift"; sourceTree = "<group>"; };
+		B100001A2C70000100000001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/APIClient.swift"; sourceTree = "<group>"; };
+		B100001B2C70000100000001 /* MockDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/MockDataStore.swift"; sourceTree = "<group>"; };
+		B1FFFFFF2C70000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BNDSCompanion/Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		D10000012C70000100000001 = {
+			isa = PBXGroup;
+			children = (
+				B10000002C70000100000001 /* AppState.swift */,
+				B10000012C70000100000001 /* BNDSCompanionApp.swift */,
+				B10000022C70000100000001 /* RootView.swift */,
+				B10000032C70000100000001 /* MentorChatView.swift */,
+				B10000042C70000100000001 /* PromptShortcutsView.swift */,
+				B10000052C70000100000001 /* SuggestionCardView.swift */,
+				B10000062C70000100000001 /* GrowthLedgerView.swift */,
+				B10000072C70000100000001 /* LifePathTreeView.swift */,
+				B10000082C70000100000001 /* NodeEditorSheet.swift */,
+				B10000092C70000100000001 /* ProfileAndPathView.swift */,
+				B100000A2C70000100000001 /* ProfileHeaderView.swift */,
+				B100000B2C70000100000001 /* FocusModeModal.swift */,
+				B100000C2C70000100000001 /* TimelineView.swift */,
+				B100000D2C70000100000001 /* TodayHeaderView.swift */,
+				B100000E2C70000100000001 /* TodayScheduleView.swift */,
+				B100000F2C70000100000001 /* OnboardingFlowView.swift */,
+				B10000102C70000100000001 /* Focus.swift */,
+				B10000112C70000100000001 /* Growth.swift */,
+				B10000122C70000100000001 /* LifePath.swift */,
+				B10000132C70000100000001 /* Mentor.swift */,
+				B10000142C70000100000001 /* Schedule.swift */,
+				B10000152C70000100000001 /* User.swift */,
+				B10000162C70000100000001 /* BNDSColors.swift */,
+				B10000172C70000100000001 /* BNDSTypography.swift */,
+				B10000182C70000100000001 /* GlassCard.swift */,
+				B10000192C70000100000001 /* StatusBadge.swift */,
+				B100001A2C70000100000001 /* APIClient.swift */,
+				B100001B2C70000100000001 /* MockDataStore.swift */,
+				B1FFFFFF2C70000100000001 /* Info.plist */,
+				D10000042C70000100000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10000042C70000100000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C10000012C70000100000001 /* BNDSCompanion.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000012C70000100000001 /* BNDSCompanion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000012C70000100000001 /* Build configuration list for PBXNativeTarget "BNDSCompanion" */;
+			buildPhases = (
+				G10000012C70000100000001 /* Sources */,
+				G10000022C70000100000001 /* Frameworks */,
+				G10000032C70000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BNDSCompanion;
+			productName = BNDSCompanion;
+			productReference = C10000012C70000100000001 /* BNDSCompanion.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		010000012C70000100000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					E10000012C70000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = F10000022C70000100000001 /* Build configuration list for PBXProject "BNDSCompanion" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D10000012C70000100000001;
+			productRefGroup = D10000042C70000100000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000012C70000100000001 /* BNDSCompanion */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		G10000012C70000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000002C70000100000001 /* AppState.swift in Sources */,
+				A10000012C70000100000001 /* BNDSCompanionApp.swift in Sources */,
+				A10000022C70000100000001 /* RootView.swift in Sources */,
+				A10000032C70000100000001 /* MentorChatView.swift in Sources */,
+				A10000042C70000100000001 /* PromptShortcutsView.swift in Sources */,
+				A10000052C70000100000001 /* SuggestionCardView.swift in Sources */,
+				A10000062C70000100000001 /* GrowthLedgerView.swift in Sources */,
+				A10000072C70000100000001 /* LifePathTreeView.swift in Sources */,
+				A10000082C70000100000001 /* NodeEditorSheet.swift in Sources */,
+				A10000092C70000100000001 /* ProfileAndPathView.swift in Sources */,
+				A100000A2C70000100000001 /* ProfileHeaderView.swift in Sources */,
+				A100000B2C70000100000001 /* FocusModeModal.swift in Sources */,
+				A100000C2C70000100000001 /* TimelineView.swift in Sources */,
+				A100000D2C70000100000001 /* TodayHeaderView.swift in Sources */,
+				A100000E2C70000100000001 /* TodayScheduleView.swift in Sources */,
+				A100000F2C70000100000001 /* OnboardingFlowView.swift in Sources */,
+				A10000102C70000100000001 /* Focus.swift in Sources */,
+				A10000112C70000100000001 /* Growth.swift in Sources */,
+				A10000122C70000100000001 /* LifePath.swift in Sources */,
+				A10000132C70000100000001 /* Mentor.swift in Sources */,
+				A10000142C70000100000001 /* Schedule.swift in Sources */,
+				A10000152C70000100000001 /* User.swift in Sources */,
+				A10000162C70000100000001 /* BNDSColors.swift in Sources */,
+				A10000172C70000100000001 /* BNDSTypography.swift in Sources */,
+				A10000182C70000100000001 /* GlassCard.swift in Sources */,
+				A10000192C70000100000001 /* StatusBadge.swift in Sources */,
+				A100001A2C70000100000001 /* APIClient.swift in Sources */,
+				A100001B2C70000100000001 /* MockDataStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		G10000022C70000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		G10000032C70000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		H10000012C70000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		H10000022C70000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		H10000032C70000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BNDSCompanion/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "十一校园助手";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.edu.bnds.companion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		H10000042C70000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BNDSCompanion/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "十一校园助手";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.edu.bnds.companion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F10000012C70000100000001 /* Build configuration list for PBXNativeTarget "BNDSCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				H10000032C70000100000001 /* Debug */,
+				H10000042C70000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000022C70000100000001 /* Build configuration list for PBXProject "BNDSCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				H10000012C70000100000001 /* Debug */,
+				H10000022C70000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 010000012C70000100000001 /* Project object */;
+}
