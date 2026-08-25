@@ -18,26 +18,28 @@
 		A10000082C70000100000001 /* NodeEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000082C70000100000001 /* NodeEditorSheet.swift */; };
 		A10000092C70000100000001 /* ProfileAndPathView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000092C70000100000001 /* ProfileAndPathView.swift */; };
 		A100000A2C70000100000001 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000A2C70000100000001 /* ProfileHeaderView.swift */; };
-		A100000B2C70000100000001 /* FocusModeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000B2C70000100000001 /* FocusModeModal.swift */; };
-		A100000C2C70000100000001 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000C2C70000100000001 /* TimelineView.swift */; };
-		A100000D2C70000100000001 /* TodayHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000D2C70000100000001 /* TodayHeaderView.swift */; };
-		A100000E2C70000100000001 /* TodayScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000E2C70000100000001 /* TodayScheduleView.swift */; };
-		A100000F2C70000100000001 /* WeekdayPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000F2C70000100000001 /* WeekdayPickerView.swift */; };
-		A10000102C70000100000001 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000102C70000100000001 /* OnboardingFlowView.swift */; };
-		A10000112C70000100000001 /* Focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000112C70000100000001 /* Focus.swift */; };
-		A10000122C70000100000001 /* Growth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000122C70000100000001 /* Growth.swift */; };
-		A10000132C70000100000001 /* LifePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000132C70000100000001 /* LifePath.swift */; };
-		A10000142C70000100000001 /* Mentor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000142C70000100000001 /* Mentor.swift */; };
-		A10000152C70000100000001 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000152C70000100000001 /* Schedule.swift */; };
-		A10000162C70000100000001 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000162C70000100000001 /* User.swift */; };
-		A10000172C70000100000001 /* BNDSColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000172C70000100000001 /* BNDSColors.swift */; };
-		A10000182C70000100000001 /* BNDSTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000182C70000100000001 /* BNDSTypography.swift */; };
-		A10000192C70000100000001 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000192C70000100000001 /* GlassCard.swift */; };
-		A100001A2C70000100000001 /* SourceBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001A2C70000100000001 /* SourceBadge.swift */; };
-		A100001B2C70000100000001 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001B2C70000100000001 /* StatusBadge.swift */; };
-		A100001C2C70000100000001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001C2C70000100000001 /* APIClient.swift */; };
-		A100001D2C70000100000001 /* CloudIngestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001D2C70000100000001 /* CloudIngestService.swift */; };
-		A100001E2C70000100000001 /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001E2C70000100000001 /* MockDataStore.swift */; };
+		A100000B2C70000100000001 /* CloudLoginSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000B2C70000100000001 /* CloudLoginSheet.swift */; };
+		A100000C2C70000100000001 /* FocusModeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000C2C70000100000001 /* FocusModeModal.swift */; };
+		A100000D2C70000100000001 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000D2C70000100000001 /* TimelineView.swift */; };
+		A100000E2C70000100000001 /* TodayHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000E2C70000100000001 /* TodayHeaderView.swift */; };
+		A100000F2C70000100000001 /* TodayScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000F2C70000100000001 /* TodayScheduleView.swift */; };
+		A10000102C70000100000001 /* WeekdayPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000102C70000100000001 /* WeekdayPickerView.swift */; };
+		A10000112C70000100000001 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000112C70000100000001 /* OnboardingFlowView.swift */; };
+		A10000122C70000100000001 /* Focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000122C70000100000001 /* Focus.swift */; };
+		A10000132C70000100000001 /* Growth.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000132C70000100000001 /* Growth.swift */; };
+		A10000142C70000100000001 /* LifePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000142C70000100000001 /* LifePath.swift */; };
+		A10000152C70000100000001 /* Mentor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000152C70000100000001 /* Mentor.swift */; };
+		A10000162C70000100000001 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000162C70000100000001 /* Schedule.swift */; };
+		A10000172C70000100000001 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000172C70000100000001 /* User.swift */; };
+		A10000182C70000100000001 /* BNDSColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000182C70000100000001 /* BNDSColors.swift */; };
+		A10000192C70000100000001 /* BNDSTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000192C70000100000001 /* BNDSTypography.swift */; };
+		A100001A2C70000100000001 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001A2C70000100000001 /* GlassCard.swift */; };
+		A100001B2C70000100000001 /* SourceBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001B2C70000100000001 /* SourceBadge.swift */; };
+		A100001C2C70000100000001 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001C2C70000100000001 /* StatusBadge.swift */; };
+		A100001D2C70000100000001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001D2C70000100000001 /* APIClient.swift */; };
+		A100001E2C70000100000001 /* CalendarSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001E2C70000100000001 /* CalendarSyncService.swift */; };
+		A100001F2C70000100000001 /* CloudIngestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001F2C70000100000001 /* CloudIngestService.swift */; };
+		A10000202C70000100000001 /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000202C70000100000001 /* MockDataStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,26 +55,28 @@
 		B10000082C70000100000001 /* NodeEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/NodeEditorSheet.swift"; sourceTree = "<group>"; };
 		B10000092C70000100000001 /* ProfileAndPathView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/ProfileAndPathView.swift"; sourceTree = "<group>"; };
 		B100000A2C70000100000001 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab1_ProfileAndPath/ProfileHeaderView.swift"; sourceTree = "<group>"; };
-		B100000B2C70000100000001 /* FocusModeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/FocusModeModal.swift"; sourceTree = "<group>"; };
-		B100000C2C70000100000001 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TimelineView.swift"; sourceTree = "<group>"; };
-		B100000D2C70000100000001 /* TodayHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayHeaderView.swift"; sourceTree = "<group>"; };
-		B100000E2C70000100000001 /* TodayScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayScheduleView.swift"; sourceTree = "<group>"; };
-		B100000F2C70000100000001 /* WeekdayPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/WeekdayPickerView.swift"; sourceTree = "<group>"; };
-		B10000102C70000100000001 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Onboarding/OnboardingFlowView.swift"; sourceTree = "<group>"; };
-		B10000112C70000100000001 /* Focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Focus.swift"; sourceTree = "<group>"; };
-		B10000122C70000100000001 /* Growth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Growth.swift"; sourceTree = "<group>"; };
-		B10000132C70000100000001 /* LifePath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/LifePath.swift"; sourceTree = "<group>"; };
-		B10000142C70000100000001 /* Mentor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Mentor.swift"; sourceTree = "<group>"; };
-		B10000152C70000100000001 /* Schedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Schedule.swift"; sourceTree = "<group>"; };
-		B10000162C70000100000001 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/User.swift"; sourceTree = "<group>"; };
-		B10000172C70000100000001 /* BNDSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSColors.swift"; sourceTree = "<group>"; };
-		B10000182C70000100000001 /* BNDSTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSTypography.swift"; sourceTree = "<group>"; };
-		B10000192C70000100000001 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/GlassCard.swift"; sourceTree = "<group>"; };
-		B100001A2C70000100000001 /* SourceBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/SourceBadge.swift"; sourceTree = "<group>"; };
-		B100001B2C70000100000001 /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/StatusBadge.swift"; sourceTree = "<group>"; };
-		B100001C2C70000100000001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/APIClient.swift"; sourceTree = "<group>"; };
-		B100001D2C70000100000001 /* CloudIngestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/CloudIngestService.swift"; sourceTree = "<group>"; };
-		B100001E2C70000100000001 /* MockDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/MockDataStore.swift"; sourceTree = "<group>"; };
+		B100000B2C70000100000001 /* CloudLoginSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/CloudLoginSheet.swift"; sourceTree = "<group>"; };
+		B100000C2C70000100000001 /* FocusModeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/FocusModeModal.swift"; sourceTree = "<group>"; };
+		B100000D2C70000100000001 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TimelineView.swift"; sourceTree = "<group>"; };
+		B100000E2C70000100000001 /* TodayHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayHeaderView.swift"; sourceTree = "<group>"; };
+		B100000F2C70000100000001 /* TodayScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/TodayScheduleView.swift"; sourceTree = "<group>"; };
+		B10000102C70000100000001 /* WeekdayPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Tab2_TodaySchedule/WeekdayPickerView.swift"; sourceTree = "<group>"; };
+		B10000112C70000100000001 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Features/Onboarding/OnboardingFlowView.swift"; sourceTree = "<group>"; };
+		B10000122C70000100000001 /* Focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Focus.swift"; sourceTree = "<group>"; };
+		B10000132C70000100000001 /* Growth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Growth.swift"; sourceTree = "<group>"; };
+		B10000142C70000100000001 /* LifePath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/LifePath.swift"; sourceTree = "<group>"; };
+		B10000152C70000100000001 /* Mentor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Mentor.swift"; sourceTree = "<group>"; };
+		B10000162C70000100000001 /* Schedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Schedule.swift"; sourceTree = "<group>"; };
+		B10000172C70000100000001 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/User.swift"; sourceTree = "<group>"; };
+		B10000182C70000100000001 /* BNDSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSColors.swift"; sourceTree = "<group>"; };
+		B10000192C70000100000001 /* BNDSTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/BNDSTypography.swift"; sourceTree = "<group>"; };
+		B100001A2C70000100000001 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/GlassCard.swift"; sourceTree = "<group>"; };
+		B100001B2C70000100000001 /* SourceBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/SourceBadge.swift"; sourceTree = "<group>"; };
+		B100001C2C70000100000001 /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Theme/Components/StatusBadge.swift"; sourceTree = "<group>"; };
+		B100001D2C70000100000001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/APIClient.swift"; sourceTree = "<group>"; };
+		B100001E2C70000100000001 /* CalendarSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/CalendarSyncService.swift"; sourceTree = "<group>"; };
+		B100001F2C70000100000001 /* CloudIngestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/CloudIngestService.swift"; sourceTree = "<group>"; };
+		B10000202C70000100000001 /* MockDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/MockDataStore.swift"; sourceTree = "<group>"; };
 		B1FFFFFF2C70000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BNDSCompanion/Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,26 +95,28 @@
 				B10000082C70000100000001 /* NodeEditorSheet.swift */,
 				B10000092C70000100000001 /* ProfileAndPathView.swift */,
 				B100000A2C70000100000001 /* ProfileHeaderView.swift */,
-				B100000B2C70000100000001 /* FocusModeModal.swift */,
-				B100000C2C70000100000001 /* TimelineView.swift */,
-				B100000D2C70000100000001 /* TodayHeaderView.swift */,
-				B100000E2C70000100000001 /* TodayScheduleView.swift */,
-				B100000F2C70000100000001 /* WeekdayPickerView.swift */,
-				B10000102C70000100000001 /* OnboardingFlowView.swift */,
-				B10000112C70000100000001 /* Focus.swift */,
-				B10000122C70000100000001 /* Growth.swift */,
-				B10000132C70000100000001 /* LifePath.swift */,
-				B10000142C70000100000001 /* Mentor.swift */,
-				B10000152C70000100000001 /* Schedule.swift */,
-				B10000162C70000100000001 /* User.swift */,
-				B10000172C70000100000001 /* BNDSColors.swift */,
-				B10000182C70000100000001 /* BNDSTypography.swift */,
-				B10000192C70000100000001 /* GlassCard.swift */,
-				B100001A2C70000100000001 /* SourceBadge.swift */,
-				B100001B2C70000100000001 /* StatusBadge.swift */,
-				B100001C2C70000100000001 /* APIClient.swift */,
-				B100001D2C70000100000001 /* CloudIngestService.swift */,
-				B100001E2C70000100000001 /* MockDataStore.swift */,
+				B100000B2C70000100000001 /* CloudLoginSheet.swift */,
+				B100000C2C70000100000001 /* FocusModeModal.swift */,
+				B100000D2C70000100000001 /* TimelineView.swift */,
+				B100000E2C70000100000001 /* TodayHeaderView.swift */,
+				B100000F2C70000100000001 /* TodayScheduleView.swift */,
+				B10000102C70000100000001 /* WeekdayPickerView.swift */,
+				B10000112C70000100000001 /* OnboardingFlowView.swift */,
+				B10000122C70000100000001 /* Focus.swift */,
+				B10000132C70000100000001 /* Growth.swift */,
+				B10000142C70000100000001 /* LifePath.swift */,
+				B10000152C70000100000001 /* Mentor.swift */,
+				B10000162C70000100000001 /* Schedule.swift */,
+				B10000172C70000100000001 /* User.swift */,
+				B10000182C70000100000001 /* BNDSColors.swift */,
+				B10000192C70000100000001 /* BNDSTypography.swift */,
+				B100001A2C70000100000001 /* GlassCard.swift */,
+				B100001B2C70000100000001 /* SourceBadge.swift */,
+				B100001C2C70000100000001 /* StatusBadge.swift */,
+				B100001D2C70000100000001 /* APIClient.swift */,
+				B100001E2C70000100000001 /* CalendarSyncService.swift */,
+				B100001F2C70000100000001 /* CloudIngestService.swift */,
+				B10000202C70000100000001 /* MockDataStore.swift */,
 				B1FFFFFF2C70000100000001 /* Info.plist */,
 				D10000042C70000100000001 /* Products */,
 			);
@@ -192,26 +198,28 @@
 				A10000082C70000100000001 /* NodeEditorSheet.swift in Sources */,
 				A10000092C70000100000001 /* ProfileAndPathView.swift in Sources */,
 				A100000A2C70000100000001 /* ProfileHeaderView.swift in Sources */,
-				A100000B2C70000100000001 /* FocusModeModal.swift in Sources */,
-				A100000C2C70000100000001 /* TimelineView.swift in Sources */,
-				A100000D2C70000100000001 /* TodayHeaderView.swift in Sources */,
-				A100000E2C70000100000001 /* TodayScheduleView.swift in Sources */,
-				A100000F2C70000100000001 /* WeekdayPickerView.swift in Sources */,
-				A10000102C70000100000001 /* OnboardingFlowView.swift in Sources */,
-				A10000112C70000100000001 /* Focus.swift in Sources */,
-				A10000122C70000100000001 /* Growth.swift in Sources */,
-				A10000132C70000100000001 /* LifePath.swift in Sources */,
-				A10000142C70000100000001 /* Mentor.swift in Sources */,
-				A10000152C70000100000001 /* Schedule.swift in Sources */,
-				A10000162C70000100000001 /* User.swift in Sources */,
-				A10000172C70000100000001 /* BNDSColors.swift in Sources */,
-				A10000182C70000100000001 /* BNDSTypography.swift in Sources */,
-				A10000192C70000100000001 /* GlassCard.swift in Sources */,
-				A100001A2C70000100000001 /* SourceBadge.swift in Sources */,
-				A100001B2C70000100000001 /* StatusBadge.swift in Sources */,
-				A100001C2C70000100000001 /* APIClient.swift in Sources */,
-				A100001D2C70000100000001 /* CloudIngestService.swift in Sources */,
-				A100001E2C70000100000001 /* MockDataStore.swift in Sources */,
+				A100000B2C70000100000001 /* CloudLoginSheet.swift in Sources */,
+				A100000C2C70000100000001 /* FocusModeModal.swift in Sources */,
+				A100000D2C70000100000001 /* TimelineView.swift in Sources */,
+				A100000E2C70000100000001 /* TodayHeaderView.swift in Sources */,
+				A100000F2C70000100000001 /* TodayScheduleView.swift in Sources */,
+				A10000102C70000100000001 /* WeekdayPickerView.swift in Sources */,
+				A10000112C70000100000001 /* OnboardingFlowView.swift in Sources */,
+				A10000122C70000100000001 /* Focus.swift in Sources */,
+				A10000132C70000100000001 /* Growth.swift in Sources */,
+				A10000142C70000100000001 /* LifePath.swift in Sources */,
+				A10000152C70000100000001 /* Mentor.swift in Sources */,
+				A10000162C70000100000001 /* Schedule.swift in Sources */,
+				A10000172C70000100000001 /* User.swift in Sources */,
+				A10000182C70000100000001 /* BNDSColors.swift in Sources */,
+				A10000192C70000100000001 /* BNDSTypography.swift in Sources */,
+				A100001A2C70000100000001 /* GlassCard.swift in Sources */,
+				A100001B2C70000100000001 /* SourceBadge.swift in Sources */,
+				A100001C2C70000100000001 /* StatusBadge.swift in Sources */,
+				A100001D2C70000100000001 /* APIClient.swift in Sources */,
+				A100001E2C70000100000001 /* CalendarSyncService.swift in Sources */,
+				A100001F2C70000100000001 /* CloudIngestService.swift in Sources */,
+				A10000202C70000100000001 /* MockDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

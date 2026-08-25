@@ -20,9 +20,15 @@ public final class AppState: ObservableObject {
     @Published public var mentorMessages: [MentorMessage]
     @Published public var interestPillars: [InterestPillar]
 
-    // 云平台同步状态
+    // 云平台同步状态与弹窗
     @Published public var isSyncingCloud: Bool = false
+    @Published public var isCloudLoginSheetPresented: Bool = false
     @Published public var lastSyncedAt: String = "刚刚"
+
+    // 日历同步状态与提示
+    @Published public var isCalendarSyncing: Bool = false
+    @Published public var calendarSyncAlertMessage: String? = nil
+    @Published public var showCalendarSyncAlert: Bool = false
 
     // 模态弹窗与编辑态控制
     @Published public var isFocusModalPresented: Bool = false
@@ -42,6 +48,30 @@ public final class AppState: ObservableObject {
         self.mentorMessages = store.mentorMessages
         self.interestPillars = store.interestPillars
         self.lastSyncedAt = store.lastSyncedAt
+    }
+
+    // MARK: - iPhone 系统日历同步
+
+    public func syncToSystemCalendar() {
+        guard !isCalendarSyncing else { return }
+        isCalendarSyncing = true
+
+        Task {
+            do {
+                let (count, title) = try await CalendarSyncService.shared.syncCoursesToSystemCalendar(courses: courses)
+                await MainActor.run {
+                    self.isCalendarSyncing = false
+                    self.calendarSyncAlertMessage = "🎉 成功将 \(count) 节课程同步至 iPhone 系统日历「\(title)」！\n已自动配置每周循环与提前 10 分钟上课提醒。"
+                    self.showCalendarSyncAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    self.isCalendarSyncing = false
+                    self.calendarSyncAlertMessage = "日历同步失败：\(error.localizedDescription)"
+                    self.showCalendarSyncAlert = true
+                }
+            }
+        }
     }
 
     // MARK: - 云平台数据同步

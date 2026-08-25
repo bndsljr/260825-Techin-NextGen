@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 今日头部组件：日期 + 云平台同步状态 + 今日主线目标
+/// 今日头部组件：日期 + 云平台同步状态 + 系统日历同步入口 + 今日主线目标
 public struct TodayHeaderView: View {
     @EnvironmentObject var appState: AppState
 
@@ -8,14 +8,14 @@ public struct TodayHeaderView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // 日期与问候
+            // 顶部状态与功能按钮栏
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Image(systemName: "cloud.fill")
                             .font(.system(size: 11))
                             .foregroundColor(BNDSColors.inProgress)
-                        Text("十一云平台同步 · \(appState.lastSyncedAt)")
+                        Text("云平台同步 · \(appState.lastSyncedAt)")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
                     }
@@ -27,31 +27,49 @@ public struct TodayHeaderView: View {
                 Spacer()
 
                 HStack(spacing: 8) {
-                    // 同步云平台按钮
+                    // 1. 云平台账号登录抓取按钮
                     Button(action: {
-                        appState.syncCloudData()
+                        appState.isCloudLoginSheetPresented = true
                     }) {
                         HStack(spacing: 4) {
-                            if appState.isSyncingCloud {
-                                ProgressView()
-                                    .scaleEffect(0.7)
-                            } else {
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                                    .font(.system(size: 11, weight: .bold))
-                            }
-                            Text(appState.isSyncingCloud ? "同步中" : "同步云平台")
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .font(.system(size: 11, weight: .bold))
+                            Text("账号抓取")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .padding(.horizontal, 10)
+                        .padding(.horizontal, 9)
                         .padding(.vertical, 7)
                         .background(
-                            Capsule().fill(BNDSColors.inProgress.opacity(0.12))
+                            Capsule().fill(BNDSColors.inProgress.opacity(0.14))
                         )
                         .foregroundColor(BNDSColors.inProgress)
                     }
-                    .disabled(appState.isSyncingCloud)
 
-                    // 专注按钮
+                    // 2. 同步到 iPhone 系统日历按钮
+                    Button(action: {
+                        appState.syncToSystemCalendar()
+                    }) {
+                        HStack(spacing: 4) {
+                            if appState.isCalendarSyncing {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            } else {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            Text(appState.isCalendarSyncing ? "同步中" : "同步日历")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule().fill(BNDSColors.oxfordNavy.opacity(0.12))
+                        )
+                        .foregroundColor(BNDSColors.oxfordNavy)
+                    }
+                    .disabled(appState.isCalendarSyncing)
+
+                    // 3. 专注模式按钮
                     Button(action: {
                         appState.isFocusModalPresented = true
                     }) {
