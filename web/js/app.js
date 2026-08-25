@@ -46,11 +46,10 @@
   function renderShell() {
     const d = store.get();
     $("#topbarUser").textContent = d.user.name + " · 高一";
-    $("#sidebarFoot").innerHTML =
-      '<div class="foot-line"><span>后端 API</span><span class="tag primary">' + API.base.replace("https://api.bnds.example.com", "") + " · " + (API.provider === "mock" ? "mock" : "live") + "</span></div>" +
-      '<div class="foot-line"><span>AI 边界</span><span class="tag accent">只建议不写</span></div>' +
-      '<div>🫵 决策权永远在你</div>';
+    const foot = $("#sidebarFoot");
+    if (foot) foot.remove();
     document.querySelectorAll(".nav-link").forEach((a) => {
+
       a.addEventListener("click", () => setTab(parseInt(a.dataset.tab, 10)));
     });
     $("#menuBtn").addEventListener("click", () => { $("#sidebar").classList.add("open"); $("#backdrop").classList.add("show"); });
