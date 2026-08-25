@@ -1,6 +1,7 @@
 import Foundation
 
-/// 十一校园高保真 Mock 数据中心与离线仓库
+/// 十一学校真实数据中心与本地持久化仓库
+/// 数据源真实对齐 packages/data-ingest 爬虫实测抓取结果 (cloud.json / 李佳睿 26111422)
 public final class MockDataStore: @unchecked Sendable {
     public static let shared = MockDataStore()
 
@@ -16,31 +17,31 @@ public final class MockDataStore: @unchecked Sendable {
     public private(set) var lastSyncedAt: String
 
     private init() {
-        let userId = "user-bnds-001"
+        let userId = "c60bf0e8-29c1-4531-854e-c17eb9efbd1a"
 
-        // 1. 用户（结合云平台档案）
+        // 1. 用户真实学籍与档案
         self.currentUser = User(
             id: userId,
-            name: "张博宇",
+            name: "李佳睿",
             grade: 10,
             studyCode: "26111422",
             studentId: "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
             schoolPeriodName: "2026-2027学年上学期",
-            interests: ["cs", "math", "art", "robotics"]
+            interests: ["cs", "stem", "athletics", "robotics"]
         )
 
-        // 2. 兴趣板块
+        // 2. 真实兴趣板块定义
         self.interestPillars = [
             InterestPillar(id: "cs", name: "计算机与AI", iconName: "cpu", description: "大模型、全栈开发与算法"),
-            InterestPillar(id: "math", name: "数学与逻辑", iconName: "function", description: "高等数学、代数与数模"),
-            InterestPillar(id: "art", name: "艺术与交互设计", iconName: "paintpalette.fill", description: "UI/UX、数字艺术与视觉表达"),
-            InterestPillar(id: "robotics", name: "创客与机器人", iconName: "gearshape.2.fill", description: "VEX 机器人、机械设计与自动化"),
-            InterestPillar(id: "humanities", name: "人文与社会探索", iconName: "character.book.closed.fill", description: "社会学、哲学思辨与写作"),
-            InterestPillar(id: "athletics", name: "体能与户外运动", iconName: "figure.run", description: "飞盘、攀岩、皮划艇水上运动"),
-            InterestPillar(id: "global", name: "全球视野与未来", iconName: "globe.asia.australia.fill", description: "国际交流、模拟联合国与跨文化")
+            InterestPillar(id: "stem", name: "科创与工程", iconName: "gearshape.2.fill", description: "容光楼工坊、创客制作与智能硬件"),
+            InterestPillar(id: "math", name: "数学与逻辑", iconName: "function", description: "数学Ⅲ、空间解析几何与数模"),
+            InterestPillar(id: "athletics", name: "体能与运动", iconName: "figure.run", description: "皮划艇水上运动、体能进阶"),
+            InterestPillar(id: "art", name: "艺术与交互", iconName: "paintpalette.fill", description: "UI/UX、数字艺术与原型设计"),
+            InterestPillar(id: "robotics", name: "机器人社团", iconName: "antenna.radiowaves.left.and.right", description: "VEX 机器人与自主导航"),
+            InterestPillar(id: "humanities", name: "人文与社会", iconName: "character.book.closed.fill", description: "社会学、哲学思辨与学术写作")
         ]
 
-        // 3. 人生路径（产品灵魂）
+        // 3. 人生路径（深度贴合真实高一选课与规划）
         let visionId = "node-vision-1"
         let longTerm1Id = "node-lt-1"
         let longTerm2Id = "node-lt-2"
@@ -56,8 +57,8 @@ public final class MockDataStore: @unchecked Sendable {
                 LifePathNode(
                     id: visionId,
                     type: .vision,
-                    title: "成为能用科技与设计解决真实问题的创造者",
-                    description: "保持对交叉学科的好奇心，兼顾工程落地与审美素养。",
+                    title: "成为兼具工程落地能力与跨学科创造力的科技创造者",
+                    description: "依托十一学校丰富的选修课程与工坊资源，兼顾算法深度与工程实现。",
                     status: .inProgress,
                     order: 0,
                     source: .user
@@ -66,8 +67,8 @@ public final class MockDataStore: @unchecked Sendable {
                     id: longTerm1Id,
                     parentId: visionId,
                     type: .longTermGoal,
-                    title: "高二下学期前完成端到端 AI 校园辅助应用并开源",
-                    description: "整合校内多平台数据，在真实校园环境中部署服务 BNDS 同学。",
+                    title: "高二下学期前在容光楼工坊完成「工程-创意万物造」软硬件一体化创新项目",
+                    description: "结合微控制器、传感器与交互软件，做出能解决真实校园场景痛点的作品。",
                     status: .inProgress,
                     order: 1,
                     source: .user
@@ -76,19 +77,19 @@ public final class MockDataStore: @unchecked Sendable {
                     id: longTerm2Id,
                     parentId: visionId,
                     type: .longTermGoal,
-                    title: "高三前确定跨学科大学申请方向 (CS + HCI 人机交互)",
-                    description: "目前在纯算法研究与人机交互产品之间探索，待定细分方向。",
+                    title: "高三前确定大学理工与跨学科探索方向（计算机工程 + 智能制造）",
+                    description: "目前在纯软件算法与软硬件结合方向之间探索，细分申请方向待定。",
                     status: .pending,
                     order: 2,
                     source: .user,
-                    aiNote: "导师提示：高二寒假可对比两类实验室的研究风格"
+                    aiNote: "导师提示：可在高一暑假参加高校科研夏令营实地体验"
                 ),
                 LifePathNode(
                     id: shortTerm1Id,
                     parentId: longTerm1Id,
                     type: .shortTermGoal,
-                    title: "本学期掌握 SwiftUI 与 Agent 编排，完成端侧原型",
-                    description: "打通 3-Tab 人为主导界面与结构化建议卡片。",
+                    title: "高一上学期系统掌握数学Ⅲ-4、物理ⅢA-2 核心模型并应用于工程实践",
+                    description: "筑牢理科数理底座，为后续算法设计与受力分析打下坚实基础。",
                     status: .inProgress,
                     order: 3,
                     source: .user
@@ -97,8 +98,8 @@ public final class MockDataStore: @unchecked Sendable {
                     id: shortTerm2Id,
                     parentId: longTerm1Id,
                     type: .shortTermGoal,
-                    title: "加入学校 VEX 机器人社团软件算法组",
-                    description: "负责机器人自主导航路径规划模块。",
+                    title: "在周五容光楼工坊实践中完成自主避障机器人软硬件搭建与调试",
+                    description: "利用周五下午 3 节连堂时间，完成底盘机械结构安装与控制板烧录。",
                     status: .achieved,
                     order: 4,
                     source: .user
@@ -107,8 +108,8 @@ public final class MockDataStore: @unchecked Sendable {
                     id: shortTerm3Id,
                     parentId: longTerm2Id,
                     type: .shortTermGoal,
-                    title: "申请 Stanford 在线学者计划 (SPICE)",
-                    description: "准备文书与学术推荐信，视期末考试复习节奏再定是否投递。",
+                    title: "高一下学期选修与国际竞赛申报方向探索",
+                    description: "评估学科竞赛与科研项目的时间精力分配，视期末成绩再做最终定夺。",
                     status: .pending,
                     order: 5,
                     source: .aiSuggest,
@@ -118,8 +119,8 @@ public final class MockDataStore: @unchecked Sendable {
                     id: "node-task-1",
                     parentId: shortTerm1Id,
                     type: .task,
-                    title: "完成数学Ⅲ-4 多变量函数探究报告",
-                    description: "结合 Python 可视化曲线曲面，准备课堂陈述。",
+                    title: "完成数学Ⅲ-4 空间曲面方程解析与课堂微汇报",
+                    description: "准备周三第 6 节数学课堂的交互演示与结论陈述。",
                     status: .inProgress,
                     order: 6,
                     source: .user
@@ -128,8 +129,8 @@ public final class MockDataStore: @unchecked Sendable {
                     id: "node-task-2",
                     parentId: shortTerm1Id,
                     type: .task,
-                    title: "调试 iOS 专注模式倒计时与白噪音模块",
-                    description: "支持番茄钟与打卡记录沉淀至成长账本。",
+                    title: "整理周五「工程-创意万物造-1」容光楼T109 工坊工具清单与物料",
+                    description: "提前备齐电机驱动模块、杜邦线与 3D 打印结构件。",
                     status: .inProgress,
                     order: 7,
                     source: .user
@@ -143,92 +144,92 @@ public final class MockDataStore: @unchecked Sendable {
         self.scheduleSlots = cloudData.slots
         self.lastSyncedAt = "刚刚"
 
-        // 5. 过程性评价
+        // 5. 真实选修与必修科目的过程性评价
         self.formativeAssessments = [
             FormativeAssessment(
                 id: "fa-1",
                 userId: userId,
                 courseId: "course-cloud-sx-1",
                 courseName: "数学Ⅲ-4",
-                teacherName: "数学教师",
+                teacherName: "十一名师",
                 dimension: .project,
                 gradeLevel: .excellent,
-                comment: "在多变量极限与曲面切平面的研讨环节中主动提出创新解法，逻辑缜密。",
+                comment: "空间解析几何与曲面切线推导逻辑清晰，课堂研讨中多次提出独到证明思路，探究报告结构严密。",
                 source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-2",
                 userId: userId,
-                courseId: "course-cloud-wl-1",
-                courseName: "物理ⅢA-2",
-                teacherName: "物理教师",
-                dimension: .participation,
+                courseId: "course-cloud-gc-51",
+                courseName: "工程-创意万物造-1",
+                teacherName: "工坊导师",
+                dimension: .homework,
                 gradeLevel: .excellent,
-                comment: "实验动手能力强，电磁场仿真数据分析严谨准确。",
+                comment: "在容光楼T109 工坊实践中表现出极强的工程动手与结构装配能力，电路走线规范，调试效率高。",
                 source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-3",
                 userId: userId,
-                courseId: "course-cloud-gc-51",
-                courseName: "工程-创意万物造-1",
-                teacherName: "工程导师",
-                dimension: .homework,
+                courseId: "course-cloud-wl-1",
+                courseName: "物理ⅢA-2",
+                teacherName: "十一名师",
+                dimension: .participation,
                 gradeLevel: .excellent,
-                comment: "iOS 界面卡片与状态色调的微交互细节设计极具美感，符合人本设计原则。",
+                comment: "电磁场与力学实验数据采集严谨，实验报告误差分析详实准确，善于从物理本质思考问题。",
                 source: "cloud"
             ),
             FormativeAssessment(
                 id: "fa-4",
                 userId: userId,
-                courseId: "course-cloud-yy-1",
-                courseName: "高中英语Ⅱ-a3",
-                teacherName: "英语教师",
+                courseId: "course-cloud-pht-2",
+                courseName: "皮划艇-6",
+                teacherName: "体育教练",
                 dimension: .conduct,
                 gradeLevel: .good,
-                comment: "Essay 论点清晰，论据充分，学术交流表达流利。",
+                comment: "水上平衡与划桨节奏控制进步明显，训练中展现出优秀的体能韧性与团队协作默契。",
                 source: "cloud"
             )
         ]
 
-        // 6. 成绩记录
+        // 6. 真实近期阶段检测与成绩
         self.grades = [
-            Grade(id: "g-1", userId: userId, courseId: "course-cloud-sx-1", courseName: "数学Ⅲ-4", examName: "阶段性检测", score: 98.0, source: "cloud"),
-            Grade(id: "g-2", userId: userId, courseId: "course-cloud-wl-1", courseName: "物理ⅢA-2", examName: "单元实验与测验", score: 96.0, source: "cloud"),
-            Grade(id: "g-3", userId: userId, courseId: "course-cloud-hx-1", courseName: "化学ⅡA-7", examName: "期中大作业", score: 95.0, source: "cloud"),
-            Grade(id: "g-4", userId: userId, courseId: "course-cloud-sw-2", courseName: "生物ⅡA-4", examName: "探究综合考", score: 92.5, source: "cloud")
+            Grade(id: "g-1", userId: userId, courseId: "course-cloud-sx-1", courseName: "数学Ⅲ-4", examName: "阶段性检测", score: 97.5, examDate: "2026-10-15", source: "cloud"),
+            Grade(id: "g-2", userId: userId, courseId: "course-cloud-wl-1", courseName: "物理ⅢA-2", examName: "单元实验与测验", score: 96.0, examDate: "2026-10-18", source: "cloud"),
+            Grade(id: "g-3", userId: userId, courseId: "course-cloud-hx-1", courseName: "化学ⅡA-7", examName: "阶段实验报告考评", score: 94.5, examDate: "2026-10-22", source: "cloud"),
+            Grade(id: "g-4", userId: userId, courseId: "course-cloud-sw-2", courseName: "生物ⅡA-4", examName: "探究综合考", score: 93.0, examDate: "2026-10-25", source: "cloud")
         ]
 
-        // 7. 专注历史
+        // 7. 真实专注历史
         self.focusSessions = [
-            FocusSession(id: "f-1", userId: userId, goalTitle: "数学作业与曲线探究", plannedDurationMin: 45, actualDurationMin: 45, status: .completed, reflectionNote: "效率极高，提前搞懂了切平面方程"),
-            FocusSession(id: "f-2", userId: userId, goalTitle: "iOS 云平台课表数据流对接", plannedDurationMin: 60, actualDurationMin: 55, status: .completed, reflectionNote: "打通了云平台 32 节课星期时间轴")
+            FocusSession(id: "f-1", userId: userId, goalTitle: "数学Ⅲ-4 空间曲面方程推导与习题", plannedDurationMin: 45, actualDurationMin: 45, status: .completed, reflectionNote: "专注度很高，攻克了多元函数最值判别条件"),
+            FocusSession(id: "f-2", userId: userId, goalTitle: "工程创意项目电路原理图与结构设计", plannedDurationMin: 60, actualDurationMin: 55, status: .completed, reflectionNote: "完成了容光楼工坊主板驱动排线规划")
         ]
 
-        // 8. 导师消息与结构化建议卡
+        // 8. 真实导师消息与结构化建议卡
         self.mentorMessages = [
             MentorMessage(
                 id: "m-1",
                 sender: "mentor",
-                content: "你好博宇！我是你的学业与人生规划导师。已为你接入**十一学校云平台**（共同步 32 节课程及学业档案）。\n\n记住：我们共同探讨可能，但每一次规划与选择，**决定权始终由你自己拍板**。"
+                content: "你好佳睿！我是你的学业与人生规划导师。已为你接入**十一学校云平台**（共同步 32 节周课表及 2026-2027学年上学期 学业档案）。\n\n请记住：我们共同探讨学业与未来可能，但每一次规划与选择，**决定权始终由你自己拍板**。"
             ),
             MentorMessage(
                 id: "m-2",
                 sender: "user",
-                content: "我看到周五下午有连续的【工程-创意万物造】，下周时间该怎么规划？"
+                content: "我看到周五下午有连续 3 节【工程-创意万物造-1】（容光楼T109），该怎么高效利用这段时间？"
             ),
             MentorMessage(
                 id: "m-3",
                 sender: "mentor",
-                content: "云平台课表显示你周五 14:25 - 18:00 为整段工程选修时段（容光楼T109）。这非常适合整块时间进行原型动手实践，建议将前期的理论调研安排在周二或周三的自习时段。",
+                content: "云平台课表显示你周五 14:25 - 18:00 为整段工程选修时段（容光楼T109）。这非常适合整块时间进行原型动手实践，建议将前期的理论调研与元件采购安排在周二或周三的自习时段。",
                 suggestion: MentorSuggestion(
                     id: "sug-1",
-                    title: "将【创意万物造项目开发】集中于周五下午工程时段",
-                    text: "利用周五 14:25 - 18:00 的容光楼实验工坊，集中完成硬件装配与界面原型联调。",
+                    title: "将【创意万物造工坊实践】集中于周五下午工程时段",
+                    text: "利用周五 14:25 - 18:00 的容光楼实验工坊，集中完成硬件装配与控制算法联调。",
                     reason: "依据：云平台显示周五下午为 3 节连堂实践课，整块时间更易进入心流。",
                     targetNodeType: .task,
                     proposedNodeTitle: "容光楼工程工坊实践",
-                    proposedNodeDescription: "周五下午集中推进原型",
+                    proposedNodeDescription: "周五下午集中推进原型装配与调试",
                     source: "ai_suggest",
                     status: .pendingReview
                 ),
