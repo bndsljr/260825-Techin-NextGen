@@ -6,6 +6,24 @@
 
 ---
 
+## 〇、项目现状（代码已落地）
+
+> 本仓库已从"规划大纲"进入"代码落地"。以下按端列出当前真实状态（随代码持续更新）。
+
+| 端 / 模块 | 状态 | 说明 |
+|-----------|------|------|
+| 📱 iOS（`apps/ios`） | ✅ 已实现 | SwiftUI 3-Tab（我/今日/导师）：Onboarding 共创、人生路径树、成长账本、课表时间轴、专注模式、导师对话与建议卡 |
+| 🌐 Web（`apps/web`） | ✅ 已实现 | 原生 HTML/CSS/JS 单页：3-Tab 侧栏 + Onboarding / 节点编辑器 / 专注（环形计时）/ 导师建议卡；设计令牌与 iOS 对齐 |
+| 🔌 数据接入（`packages/data-ingest`） | 🟡 部分 | TS 框架 + manual（JSON/CSV/iCal）已跑通；云平台实机调研 + 爬虫完成；ManageBac 待接入 |
+| 🧠 AI 大模型（`packages/ai`） | ⬜ 未开始 | 文档/契约已定，代码待写 |
+| 🗓 其余 packages（scheduler/focus/path/contracts） | ⬜ 未开始 | 逻辑已在 iOS/Web 中体现，包级实现与 `contracts` 待落地 |
+| 🔧 后端统一服务（`apps/api`） | ⬜ 未开始 | 契约已定（REST/WS），实现待开发 |
+| 📚 设计文档（`docs/`） | ✅ 已建 | 架构 / 数据模型 / API 契约 / 事件 / UX-IA / 各模块对接文 |
+
+> 🎨 **设计语言已统一**：Web `css/styles.css` 的令牌与 iOS `Theme/BNDSColors` 完全对齐（`crimson #A31C2E`、`oxford #1A2647`、四态色、渐变、圆角/阴影）。
+
+---
+
 ## 一、项目背景与痛点
 
 十一学校学生在校内学习生活中，接触到的信息分散且割裂：
@@ -91,13 +109,15 @@
 
 ## 六、数据整合方案（信息源）
 
-| 信息源 | 数据内容 | 接入方式 |
-|--------|----------|----------|
-| 十一学校云平台 | 课表、过程性评价、考试成绩、校内通知 | 待确认：API / 导出导入 / 手动 |
-| ManageBac | 课表、作业、评分、IB 相关资料 | 待确认：同上 |
-| 用户本人 | 人生路径、兴趣板块、目标、笔记、标签 | 应用内共创录入 |
+**Data-ingest 现状**：`packages/data-ingest` 已搭好适配器框架（`manual` 可跑通 JSON/CSV/iCal），并对**十一云平台完成实机调研 + 爬虫**（SSO/CAS 登录、课表/评价/成绩接口），样本见 `test/fixtures/cloud.json`。
 
-> ⚠️ **关键待调研项**：云平台与 ManageBac 是否提供开放 API / iCal / CSV 导出、或可识别的数据格式。最稳妥的第一版方案是"**用户导入 → 应用解析归一化**"。
+| 信息源 | 数据内容 | 接入现状 |
+|--------|----------|----------|
+| 十一学校云平台 | 课表、过程性评价、考试成绩、个人信息 | 🟡 已调研 + 爬虫（`scripts/cloud_crawler.py`，只读、SSO 登录） |
+| ManageBac | 课表、作业、评分、IB 相关资料 | ⬜ 适配器框架已留 Crawler 插槽，真实接入待调研 |
+| 用户本人 | 人生路径、兴趣板块、目标、笔记、标签 | ✅ 应用内共创录入（iOS/Web） |
+
+> ⚠️ **待办**：ManageBac 的授权方式（OAuth/导出）与字段仍需确认；所有接入须**只读、授权、脱敏**。详见 `docs/module-data-ingest.md` 与 `packages/data-ingest/README.md`。
 
 ---
 
@@ -150,13 +170,13 @@
 
 ## 九、路线图（Roadmap）
 
-| 阶段 | 目标 | 关键交付 |
-|------|------|----------|
-| **Phase 0 调研** | 确认数据可获得性、接入方式、合规要求 | 调研报告、可行性结论 |
-| **Phase 1 MVP** | 统一课表 + 同步到日历 | 课表解析、日历订阅、基础 Dashboard |
-| **Phase 2** | 专注模式 + 评价/成绩整合视图 | 课表驱动的专注模式、数据聚合视图 |
-| **Phase 3** | 人生路径 + 大模型辅导 | Onboarding 共创、路径档案、AI 分析建议 |
-| **Phase 4** | 深度个性化学业指导 + 交流渠道 | 以路径为主轴的辅导、对话、提醒 |
+| 阶段 | 目标 | 关键交付 | 状态 |
+|------|------|----------|------|
+| **Phase 0 调研** | 确认数据可获得性、接入方式 | 调研报告、可行性结论 | ✅ 云平台完成实机调研 |
+| **Phase 1 MVP** | 统一课表 + 同步到日历 | 课表解析、日历订阅、基础 Dashboard | 🟡 课表接入完成，日历订阅待做 |
+| **Phase 2** | 专注模式 + 评价/成绩整合视图 | 专注模式、成长账本 | ✅ iOS/Web 已实现 |
+| **Phase 3** | 人生路径 + 大模型辅导 | Onboarding 共创、路径档案、AI 分析 | 🟡 路径/Onboarding 已实现，AI 待接入 |
+| **Phase 4** | 深度个性化学业指导 + 后端 | 以路径为主轴的辅导、后端统一服务 | ⬜ 待开发 |
 
 ---
 
@@ -193,24 +213,27 @@
 │   ├── data-model.md         # 统一数据模型（对接基石）
 │   ├── api-contract.md       # 后端统一 API 契约（客户端基准）
 │   ├── events.md             # 模块间事件契约
+│   ├── ux-ia.md              # 界面信息架构与层级规范
 │   ├── module-data-ingest.md # 数据接入模块
 │   ├── module-scheduler.md   # 课表 → 日历
 │   ├── module-focus.md       # 专注模式
 │   ├── module-path.md        # 人生路径领域模型
 │   └── module-ai.md          # AI 大模型接入
 ├── apps/
-│   ├── web/                  # 前端 Web（Dashboard / 日程 / 专注 / AI 对话 / Onboarding）
-│   ├── api/                  # 后端统一服务
-│   └── ios/                  # iOS 移动端
+│   ├── web/                  # ✅ 前端 Web：index.html / js/app.js,data.js / css/styles.css
+│   ├── ios/                  # ✅ iOS：SwiftUI 3-Tab（Sources/App,Features,Models,Services,Theme + Tests）
+│   └── api/                  # ⬜ 后端统一服务（待开发）
 ├── packages/
-│   ├── data-ingest/          # 多来源数据接入与归一化（云平台 / ManageBac）
-│   ├── scheduler/            # 课表解析 / 日历同步
-│   ├── focus/                # 专注模式
-│   ├── path/                 # 人生路径领域模型（兴趣 / 目标 / 节点状态）
-│   ├── ai/                   # LLM / RAG / Prompt 编排（辅助不越位）
-│   └── contracts/            # 共享数据模型 / 类型定义
-└── infra/                    # 部署、配置
+│   ├── data-ingest/          # 🟡 数据接入：src/（adapters/ 归一化/去重/事件）+ scripts/cloud_crawler.py
+│   ├── scheduler/            # ⬜ 课表解析 / 日历同步
+│   ├── focus/                # ⬜ 专注模式
+│   ├── path/                 # ⬜ 人生路径领域模型
+│   ├── ai/                   # ⬜ LLM / RAG / Prompt 编排
+│   └── contracts/            # ⬜ 共享数据模型 / 类型定义
+└── infra/                    # ⬜ 部署、配置
 ```
+
+> ✅ 已实现 · 🟡 部分 · ⬜ 未开始
 
 ---
 
@@ -235,11 +258,12 @@
 
 ---
 
-## 附：下一步建议
+## 附：下一步建议（基于当前代码）
 
-1. 先做 **Phase 0 数据调研** —— 确认云平台 / ManageBac 数据是否可接入；
-2. 各端按 `docs/` 对接文档开始搭建骨架与接口；
-3. 明确技术选型与账号 / 存储方案；
-4. 按 `packages/path` + Onboarding 共创流程细化产品原型（这是产品灵魂）。
+1. **打通后端**：按 `docs/api-contract.md` 实现 `apps/api`，把 iOS/Web 的模拟数据换成真实 API。
+2. **接入 AI**：实现 `packages/ai`（`/ai/mentor`），落地「以人生路径为主轴」的个性化辅导 + RAG。
+3. **ManageBac 接入**：给 `packages/data-ingest` 补 `ManageBacAdapter` 的 Crawler，字段对齐后归一化。
+4. **落 `packages/contracts`**：把 `docs/data-model.md` 及 iOS/Web 的模型收敛为共享类型，避免多处各扩字段。
+5. **日历订阅**：实现 `packages/scheduler`，把课表导出为 ICS/CalDAV 订阅链接。
 
 *本大纲为初版，随调研与决策持续迭代。*
