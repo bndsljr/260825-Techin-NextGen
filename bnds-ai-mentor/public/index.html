@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学业导师 · 辅助不越位</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --line:#e6e8ef; --ink:#1f2430; --sub:#6b7280;
+            --accent:#3b82f6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --ai:#8b5cf6; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+           background:var(--bg); color:var(--ink); }
+    header { padding:18px 22px; background:var(--card); border-bottom:1px solid var(--line);
+             display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    header h1 { font-size:18px; margin:0; }
+    .badge { font-size:12px; padding:3px 9px; border-radius:999px; background:#eef2ff; color:var(--accent); }
+    .mode { font-size:12px; color:var(--sub); }
+    main { max-width:820px; margin:0 auto; padding:18px 16px 40px; display:grid; gap:16px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+    .cards { display:grid; gap:10px; }
+    .ctx { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px; color:var(--sub); }
+    .ctx b { color:var(--ink); }
+    .thread { display:flex; flex-direction:column; gap:12px; min-height:180px; }
+    .bubble { max-width:88%; padding:11px 14px; border-radius:12px; font-size:14px; line-height:1.65;
+              white-space:pre-wrap; word-break:break-word; }
+    .bubble.user { align-self:flex-end; background:var(--accent); color:#fff; }
+    .bubble.bot { align-self:flex-start; background:#f1f3f9; }
+    .bubble.bot .caret { display:inline-block; width:7px; height:16px; background:var(--accent);
+                         vertical-align:-2px; animation:blink 1s steps(2) infinite; }
+    @keyframes blink { 50%{opacity:0;} }
+    .empty { color:var(--sub); font-size:13px; text-align:center; padding:24px 0; }
+    .cardrow { border:1px solid var(--line); border-left:4px solid var(--ai); border-radius:10px;
+               padding:10px 13px; display:flex; flex-direction:column; gap:8px; }
+    .cardrow .head { display:flex; align-items:center; gap:8px; }
+    .cardrow .kind { font-size:11px; color:var(--sub); background:#f4f4f8; padding:2px 7px; border-radius:999px; }
+    .cardrow .title { font-weight:600; font-size:14px; }
+    .cardrow .text { font-size:13px; color:var(--ink); line-height:1.6; }
+    .cardrow .detail { font-size:12px; color:var(--sub); }
+    .cardrow .foot { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .flag { font-size:11px; padding:2px 8px; border-radius:999px; }
+    .flag.decision { background:#fef3c7; color:#92600a; }
+    .flag.src { background:#eef2ff; color:var(--accent); }
+    .flag.adopted { background:#dcfce7; color:#15803d; }
+    button { font:inherit; font-size:13px; padding:7px 14px; border-radius:9px; border:1px solid var(--line);
+             background:#fff; color:var(--ink); cursor:pointer; transition:.15s; }
+    button:hover { border-color:var(--accent); color:var(--accent); }
+    button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    button.primary:hover { background:#2563eb; }
+    button.danger { border-color:var(--err); color:var(--err); }
+    button.danger:hover { background:var(--err); color:#fff; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .composer { display:flex; gap:10px; }
+    .composer input { flex:1; font:inherit; padding:11px 14px; border-radius:10px; border:1px solid var(--line); }
+    .composer input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px #dbeafe; }
+    .tools { display:flex; gap:10px; flex-wrap:wrap; margin-top:2px; }
+    .log { max-height:220px; overflow:auto; background:#0f172a; color:#a5f3fc; font-size:12px;
+           border-radius:12px; padding:12px 14px; font-family:ui-monospace,Consolas,monospace; white-space:pre-wrap; }
+    .log .leak { color:var(--err); font-weight:700; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    select { font:inherit; font-size:13px; padding:7px 10px; border:1px solid var(--line); border-radius:9px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>学业导师 <span class="badge">辅助不越位</span></h1>
+    <span class="mode">model: <b id="model">—</b> · mode: <b id="mode">—</b></span>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="row">
+        <label>学生</label>
+        <select id="student">
+          <option value="202400101">张明 · 计算机类2301</option>
+        </select>
+        <button id="refresh" title="重新拉取学生上下文">刷新上下文</button>
+      </div>
+      <div class="ctx" id="context">加载中…</div>
+    </div>
+
+    <div class="card">
+      <div class="cards thread" id="thread">
+        <div class="empty" id="empty">先问一句，比如「我这周该怎么安排？」</div>
+      </div>
+      <div class="composer">
+        <input id="input" placeholder="输入你的问题 / 本周需求…" autocomplete="off" />
+        <button id="send" class="primary">发送</button>
+      </div>
+      <div class="tools" style="margin-top:10px">
+        <button id="demo-adopt" class="danger" disabled>以 AI 身份直接写入（演示 403 拦截）</button>
+        <label style="font-size:12px;color:var(--sub)">演示：AI 只能给建议，不能自己落 life-path</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-weight:600;font-size:14px;margin-bottom:8px">原始 SSE 流（校验分隔符是否漏出）</div>
+      <div class="log" id="log">—</div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const el = { context:$('#context'), thread:$('#thread'), empty:$('#empty'),
+                 input:$('#input'), send:$('#send'), log:$('#log'),
+                 model:$('#model'), mode:$('#mode'), student:$('#student'),
+                 refresh:$('#refresh'), demoAdopt:$('#demo-adopt') };
+
+    const studentId = () => el.student.value;
+    const esc = (s) => (s == null ? '' : String(s));
+    let suggestions = {};   // id -> card element
+
+    function log(line, cls) {
+      if (el.log.textContent === '—') el.log.textContent = '';
+      el.log.textContent += (cls ? (cls + ' ') : '') + line + '\n';
+      el.log.scrollTop = el.log.scrollHeight;
+    }
+
+    function markLeak(t) {
+      // 若分隔符泄漏到界面，这里会命中
+      const m = t && t.match(/<{2,}\s*SUGGESTIONS?/);
+      if (m) log('!! 分隔符泄漏: ' + t, 'leak');
+      return m;
+    }
+
+    function addUser(text) {
+      const b = document.createElement('div');
+      b.className = 'bubble user';
+      b.textContent = text;
+      el.thread.appendChild(b);
+    }
+
+    function botBubble() {
+      if (el.empty) { el.empty.remove(); }
+      const b = document.createElement('div');
+      b.className = 'bubble bot';
+      b.dataset.role = 'bot';
+      el.thread.appendChild(b);
+      return b;
+    }
+
+    async function loadContext() {
+      try {
+        const r = await fetch('/api/context?studentId=' + encodeURIComponent(studentId()));
+        const j = await r.json();
+        el.context.innerHTML =
+          '<div>姓名<b> ' + esc(j.student.maskedName) + '</b> · 学号<b> ' + esc(j.student.maskedStudentNo) + '</b> · <b> ' + esc(j.student.className) + '</b></div>' +
+          '<div>GPA <b> ' + j.grades.gpa + '</b> · 平均分 <b> ' + j.grades.avg + '</b> · 已修学分 <b> ' + j.grades.credits + '</b></div>';
+        el.model.textContent = j.llm ? j.llm.model : '—';
+        el.mode.textContent = 'mock' in (j.llm||{}) ? (j.llm.mock ? 'mock' : 'real') : '—';
+        log('[context] GPA=' + j.grades.gpa + ' name=' + j.student.maskedName);
+      } catch (e) { el.context.textContent = '加载失败: ' + e; }
+    }
+
+    async function ask() {
+      const text = el.input.value.trim();
+      if (!text) return;
+      el.input.value = '';
+      addUser(text);
+      const bubble = botBubble();
+      bubble.classList.add('typing');
+
+      let sse = '';
+      let done = false;
+      const onDone = () => {
+        bubble.classList.remove('typing');
+        el.send.disabled = false;
+        el.demoAdopt.disabled = false;
+        if (!bubble.textContent.trim()) bubble.textContent = '（模型未返回正文）';
+      };
+
+      // GET + EventSource 便于自动重连；如需 POST 可换 fetch + ReadableStream 解析。
+      const url = '/api/mentor/stream?studentId=' + encodeURIComponent(studentId()) +
+                  '&message=' + encodeURIComponent(text);
+      try {
+        const res = await fetch(url);
+        el.log.textContent === '—' && (el.log.textContent = '');
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { value, done: d } = await reader.read();
+          if (d) break;
+          sse += decoder.decode(value, { stream: true });
+          let idx;
+          while ((idx = sse.indexOf('\n\n')) >= 0) {
+            const frame = sse.slice(0, idx); sse = sse.slice(idx + 2);
+            const ev = parseFrame(frame);
+            if (ev) await handleEvent(ev, bubble);
+          }
+        }
+        if (sse.trim()) { const ev = parseFrame(sse); if (ev) await handleEvent(ev, bubble); }
+      } catch (e) {
+        log('[error] ' + e);
+        bubble.textContent = '请求失败: ' + e;
+      }
+      onDone();
+    }
+
+    function parseFrame(frame) {
+      let event = 'message', data = null;
+      for (const line of frame.split('\n')) {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) data = line.slice(5).trim();
+      }
+      if (data == null) return null;
+      let parsed; try { parsed = JSON.parse(data); } catch { return null; }
+      return { event, data: parsed };
+    }
+
+    async function handleEvent(ev, bubble) {
+      if (ev.data.llm) { el.model.textContent = ev.data.llm.model || el.model.textContent; el.mode.textContent = ev.data.llm.mock ? 'mock' : 'real'; }
+      if (ev.event === 'meta') {
+        log('[meta] student=' + ev.data.student.maskedName);
+        return;
+      }
+      if (ev.event === 'body') {
+        const t = ev.data.text || '';
+        const leak = markLeak(t);
+        const cursor = document.createElement('span');
+        cursor.className = 'caret';
+        const tt = document.createTextNode(t);
+        bubble.appendChild(tt);
+        bubble.appendChild(cursor);
+        log(t);
+        return;
+      }
+      if (ev.event === 'suggestion') {
+        renderSuggestion(ev.data);
+        log('[suggestion] ' + ev.data.id + ' ' + ev.data.title);
+        return;
+      }
+      if (ev.event === 'done') {
+        log('[done] ok=' + ev.data.ok + ' count=' + (ev.data.suggestionCount||0) + (ev.data.error?(' err='+ev.data.error):''));
+        if (!ev.data.ok && ev.data.error) bubble.textContent = '生成失败: ' + ev.data.error;
+        return;
+      }
+    }
+
+    function renderSuggestion(s) {
+      let row = suggestions[s.id];
+      if (!row) {
+        row = document.createElement('div');
+        row.className = 'cardrow';
+        row.dataset.id = s.id;
+        row.innerHTML =
+          '<div class="head"><span class="kind">' + esc(s.kind) + '</span><span class="title">' + esc(s.title) + '</span></div>' +
+          '<div class="text">' + esc(s.text) + '</div>' +
+          (s.detail ? '<div class="detail">依据：' + esc(s.detail) + '</div>' : '') +
+          '<div class="foot"></div>';
+        suggestions[s.id] = row;
+        const thread = el.thread;
+        const firstBot = thread.querySelector('.bubble.bot:last-of-type');
+        thread.appendChild(row);
+      }
+      const foot = row.querySelector('.foot');
+      foot.innerHTML = '';
+      const src = document.createElement('span');
+      src.className = 'flag src'; src.textContent = s.source + (/pending|adopted/.test(s.status)? ' · ' + s.status : '');
+      foot.appendChild(src);
+      if (s.decisionRequired) {
+        const f = document.createElement('span'); f.className = 'flag decision'; f.textContent = '需你拍板';
+        foot.appendChild(f);
+      }
+      if (s.status !== 'adopted') {
+        const b = document.createElement('button'); b.className = 'adoptBtn primary'; b.textContent = '采纳为我的选择';
+        b.onclick = () => adopt(s.id, row, b);
+        foot.appendChild(b);
+      }
+    }
+
+    async function adopt(id, row, btn) {
+      btn.disabled = true;
+      const r = await fetch('/api/life-path/entries?studentId=' + encodeURIComponent(studentId()), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: 'user', suggestionId: id }),
+      });
+      const j = await r.json();
+      if (r.ok) {
+        log('[adopt] ok -> ' + j.id);
+        renderSuggestion({ ...j, status: 'adopted' });
+      } else {
+        log('[adopt] fail ' + r.status + ': ' + j.error);
+        alert('采纳失败：' + j.error);
+        btn.disabled = false;
+      }
+    }
+
+    async function demoAIConstraint() {
+      // 演示：把 actor 传成 ai，应被服务端 403 拦截（AI 不越位）。
+      const r = await fetch('/api/life-path/entries?studentId=' + encodeURIComponent(studentId()), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: 'ai', text: 'AI 想自己写一条 life-path（不应成功）' }),
+      });
+      const j = await r.json();
+      log('[demo-403] status=' + r.status + ' ' + JSON.stringify(j));
+      if (r.status === 403) alert('✅ "AI 不越位" 校验生效：服务端返回 403 拒绝 AI 直接写入。');
+      else alert('❌ 预期 403，实际 ' + r.status + '：' + j.error);
+    }
+
+    el.send.onclick = ask;
+    el.input.addEventListener('keydown', (e) => { if (e.key === 'Enter') ask(); });
+    el.refresh.onclick = loadContext;
+    el.demoAdopt.onclick = demoAIConstraint;
+
+    loadContext();
+    log('ready — mock=' + el.mode.textContent);
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+{
+  "user": {
+    "id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+    "name": "李佳睿",
+    "grade": 10,
+    "study_code": "26111422",
+    "student_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+    "school_period_name": "2026-2027学年上学期",
+    "interests": ["cs", "stem", "athletics", "robotics"],
+    "created_at": "2026-08-25T08:00:00Z",
+    "updated_at": "2026-08-25T08:00:00Z"
+  },
+  "life_path": {
+    "id": "path-001",
+    "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+    "title": "高一至高三全景探索与规划",
+    "nodes": [
+      {
+        "id": "node-vision-1",
+        "parent_id": null,
+        "type": "vision",
+        "title": "成为兼具工程落地能力与跨学科创造力的科技创造者",
+        "description": "依托十一学校丰富的选修课程与工坊资源，兼顾算法深度与工程实现。",
+        "status": "in_progress",
+        "order": 0,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-lt-1",
+        "parent_id": "node-vision-1",
+        "type": "long_term_goal",
+        "title": "高二下学期前在容光楼工坊完成「工程-创意万物造」软硬件一体化创新项目",
+        "description": "结合微控制器、传感器与交互软件，做出能解决真实校园场景痛点的作品。",
+        "status": "in_progress",
+        "order": 1,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-lt-2",
+        "parent_id": "node-vision-1",
+        "type": "long_term_goal",
+        "title": "高三前确定大学理工与跨学科探索方向（计算机工程 + 智能制造）",
+        "description": "目前在纯软件算法与软硬件结合方向之间探索，细分申请方向待定。",
+        "status": "pending",
+        "order": 2,
+        "source": "user",
+        "ai_note": "导师提示：可在高一暑假参加高校科研夏令营实地体验",
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-st-1",
+        "parent_id": "node-lt-1",
+        "type": "short_term_goal",
+        "title": "高一上学期系统掌握数学Ⅲ-4、物理ⅢA-2 核心模型并应用于工程实践",
+        "description": "筑牢理科数理底座，为后续算法设计与受力分析打下坚实基础。",
+        "status": "in_progress",
+        "order": 3,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-st-2",
+        "parent_id": "node-lt-1",
+        "type": "short_term_goal",
+        "title": "在周五容光楼工坊实践中完成自主避障机器人软硬件搭建与调试",
+        "description": "利用周五下午 3 节连堂时间，完成底盘机械结构安装与控制板烧录。",
+        "status": "achieved",
+        "order": 4,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-st-3",
+        "parent_id": "node-lt-2",
+        "type": "short_term_goal",
+        "title": "高一下学期选修与国际竞赛申报方向探索",
+        "description": "评估学科竞赛与科研项目的时间精力分配，视期末成绩再做最终定夺。",
+        "status": "pending",
+        "order": 5,
+        "source": "ai_suggest",
+        "ai_note": "由导师在学业分析对话中启发提出",
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-task-1",
+        "parent_id": "node-st-1",
+        "type": "task",
+        "title": "完成数学Ⅲ-4 空间曲面方程解析与课堂微汇报",
+        "description": "准备周三第 6 节数学课堂的交互演示与结论陈述。",
+        "status": "in_progress",
+        "order": 6,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      },
+      {
+        "id": "node-task-2",
+        "parent_id": "node-st-1",
+        "type": "task",
+        "title": "整理周五「工程-创意万物造-1」容光楼T109 工坊工具清单与物料",
+        "description": "提前备齐电机驱动模块、杜邦线与 3D 打印结构件。",
+        "status": "in_progress",
+        "order": 7,
+        "source": "user",
+        "ai_note": null,
+        "created_at": "2026-08-25T08:00:00Z",
+        "updated_at": "2026-08-25T08:00:00Z"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-08-25T08:00:00Z",
+    "updated_at": "2026-08-25T08:00:00Z"
+  },
+  "formative_assessments": [
+    {
+      "id": "fa-1",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-sx-1",
+      "course_name": "数学Ⅲ-4",
+      "teacher_name": "十一名师",
+      "dimension": "project",
+      "grade_level": "excellent",
+      "comment": "空间解析几何与曲面切线推导逻辑清晰，课堂研讨中多次提出独到证明思路，探究报告结构严密。",
+      "source": "cloud",
+      "external_id": null,
+      "assessed_at": "2026-08-25T08:00:00Z"
+    },
+    {
+      "id": "fa-2",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-gc-51",
+      "course_name": "工程-创意万物造-1",
+      "teacher_name": "工坊导师",
+      "dimension": "homework",
+      "grade_level": "excellent",
+      "comment": "在容光楼T109 工坊实践中表现出极强的工程动手与结构装配能力，电路走线规范，调试效率高。",
+      "source": "cloud",
+      "external_id": null,
+      "assessed_at": "2026-08-25T08:00:00Z"
+    },
+    {
+      "id": "fa-3",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-wl-1",
+      "course_name": "物理ⅢA-2",
+      "teacher_name": "十一名师",
+      "dimension": "participation",
+      "grade_level": "excellent",
+      "comment": "电磁场与力学实验数据采集严谨，实验报告误差分析详实准确，善于从物理本质思考问题。",
+      "source": "cloud",
+      "external_id": null,
+      "assessed_at": "2026-08-25T08:00:00Z"
+    },
+    {
+      "id": "fa-4",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-pht-2",
+      "course_name": "皮划艇-6",
+      "teacher_name": "体育教练",
+      "dimension": "conduct",
+      "grade_level": "good",
+      "comment": "水上平衡与划桨节奏控制进步明显，训练中展现出优秀的体能韧性与团队协作默契。",
+      "source": "cloud",
+      "external_id": null,
+      "assessed_at": "2026-08-25T08:00:00Z"
+    }
+  ],
+  "grades": [
+    {
+      "id": "g-1",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-sx-1",
+      "course_name": "数学Ⅲ-4",
+      "exam_name": "阶段性检测",
+      "score": 97.5,
+      "max_score": 100.0,
+      "weight": 1.0,
+      "exam_date": "2026-10-15",
+      "source": "cloud",
+      "external_id": null
+    },
+    {
+      "id": "g-2",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-wl-1",
+      "course_name": "物理ⅢA-2",
+      "exam_name": "单元实验与测验",
+      "score": 96.0,
+      "max_score": 100.0,
+      "weight": 1.0,
+      "exam_date": "2026-10-18",
+      "source": "cloud",
+      "external_id": null
+    },
+    {
+      "id": "g-3",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-hx-1",
+      "course_name": "化学ⅡA-7",
+      "exam_name": "阶段实验报告考评",
+      "score": 94.5,
+      "max_score": 100.0,
+      "weight": 1.0,
+      "exam_date": "2026-10-22",
+      "source": "cloud",
+      "external_id": null
+    },
+    {
+      "id": "g-4",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "course_id": "course-cloud-sw-2",
+      "course_name": "生物ⅡA-4",
+      "exam_name": "探究综合考",
+      "score": 93.0,
+      "max_score": 100.0,
+      "weight": 1.0,
+      "exam_date": "2026-10-25",
+      "source": "cloud",
+      "external_id": null
+    }
+  ],
+  "focus_sessions": [
+    {
+      "id": "f-1",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "goal_title": "数学Ⅲ-4 空间曲面方程推导与习题",
+      "started_at": "2026-08-25T06:00:00Z",
+      "ended_at": "2026-08-25T06:45:00Z",
+      "planned_duration_min": 45,
+      "actual_duration_min": 45,
+      "status": "completed",
+      "reflection_note": "专注度很高，攻克了多元函数最值判别条件"
+    },
+    {
+      "id": "f-2",
+      "user_id": "c60bf0e8-29c1-4531-854e-c17eb9efbd1a",
+      "goal_title": "工程创意项目电路原理图与结构设计",
+      "started_at": "2026-08-25T07:00:00Z",
+      "ended_at": "2026-08-25T07:55:00Z",
+      "planned_duration_min": 60,
+      "actual_duration_min": 55,
+      "status": "completed",
+      "reflection_note": "完成了容光楼工坊主板驱动排线规划"
+    }
+  ]
+}

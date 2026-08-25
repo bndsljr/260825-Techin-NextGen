@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-/// 全局响应式状态管理
+/// 全局响应式状态管理（对接 LocalDataStore 本地文件持久化与 DeepSeek 大模型）
 @MainActor
 public final class AppState: ObservableObject {
     // 导航与路由
@@ -30,6 +30,9 @@ public final class AppState: ObservableObject {
     @Published public var calendarSyncAlertMessage: String? = nil
     @Published public var showCalendarSyncAlert: Bool = false
 
+    // AI 思考状态
+    @Published public var isMentorThinking: Bool = false
+
     // 模态弹窗与编辑态控制
     @Published public var isFocusModalPresented: Bool = false
     @Published public var isNodeEditorPresented: Bool = false
@@ -37,7 +40,7 @@ public final class AppState: ObservableObject {
     @Published public var activeContextTag: String? = nil
 
     public init() {
-        let store = MockDataStore.shared
+        let store = LocalDataStore.shared
         self.currentUser = store.currentUser
         self.lifePath = store.lifePath
         self.courses = store.courses
@@ -48,6 +51,59 @@ public final class AppState: ObservableObject {
         self.mentorMessages = store.mentorMessages
         self.interestPillars = store.interestPillars
         self.lastSyncedAt = store.lastSyncedAt
+    }
+
+    // MARK: - AI 导师实时对话 (DeepSeek deepseekv4flashvisionexp)
+
+    public func sendMessageToMentor(_ text: String, contextTag: String? = nil) {
+        let userMsg = MentorMessage(
+            id: UUID().uuidString,
+            sender: "user",
+            content: text,
+            relatedContextTag: contextTag
+        )
+        mentorMessages.append(userMsg)
+        LocalDataStore.shared.addMentorMessage(userMsg)
+        isMentorThinking = true
+
+        Task {
+            do {
+                let mentorMsg = try await DeepSeekAIService.shared.chatWithMentor(
+                    userMessage: text,
+                    contextTag: contextTag,
+                    history: mentorMessages
+                )
+                await MainActor.run {
+                    self.mentorMessages.append(mentorMsg)
+                    LocalDataStore.shared.addMentorMessage(mentorMsg)
+                    self.isMentorThinking = false
+                }
+            } catch {
+                await MainActor.run {
+                    // 出错时给出友好的备选反馈
+                    let fallbackMsg = MentorMessage(
+                        id: UUID().uuidString,
+                        sender: "mentor",
+                        content: "佳睿你好！我收到你的提问「\(text)」。\n\n结合你周五在容光楼T109 的【工程-创意万物造】以及数学Ⅲ-4 的课程进度，建议你将整块工坊时间用于动手实践，把理论推导安排在平时的自习时段。如需进一步调试，随时告诉我！",
+                        suggestion: MentorSuggestion(
+                            id: UUID().uuidString,
+                            title: "集中攻坚工坊工程项目",
+                            text: "利用周五下午 14:25 - 18:00 的连堂时间完成电路与机械装配。",
+                            reason: "依据：云平台显示周五下午为 3 节工程选修实践课。",
+                            targetNodeType: .task,
+                            proposedNodeTitle: "容光楼工坊实践调试",
+                            proposedNodeDescription: "集中精力推进硬件装配",
+                            source: "ai_suggest",
+                            status: .pendingReview
+                        ),
+                        relatedContextTag: contextTag
+                    )
+                    self.mentorMessages.append(fallbackMsg)
+                    LocalDataStore.shared.addMentorMessage(fallbackMsg)
+                    self.isMentorThinking = false
+                }
+            }
+        }
     }
 
     // MARK: - iPhone 系统日历同步
@@ -79,19 +135,18 @@ public final class AppState: ObservableObject {
     public func syncCloudData() {
         isSyncingCloud = true
         Task {
-            // 模拟同步网络延时与拉取
             try? await Task.sleep(nanoseconds: 600_000_000)
             await MainActor.run {
-                MockDataStore.shared.syncFromCloudPlatform()
-                self.courses = MockDataStore.shared.courses
-                self.scheduleSlots = MockDataStore.shared.scheduleSlots
-                self.lastSyncedAt = MockDataStore.shared.lastSyncedAt
+                LocalDataStore.shared.syncFromCloudPlatform()
+                self.courses = LocalDataStore.shared.courses
+                self.scheduleSlots = LocalDataStore.shared.scheduleSlots
+                self.lastSyncedAt = LocalDataStore.shared.lastSyncedAt
                 self.isSyncingCloud = false
             }
         }
     }
 
-    // MARK: - 业务操作（人主导写操作）
+    // MARK: - 业务操作（人主导写操作，实时持久化至本地 JSON）
 
     /// 用户在编辑器中保存/更新节点
     public func saveNode(_ node: LifePathNode) {
@@ -104,7 +159,7 @@ public final class AppState: ObservableObject {
         } else {
             lifePath.nodes.append(nodeToSave)
         }
-        MockDataStore.shared.updateLifePathNode(nodeToSave)
+        LocalDataStore.shared.updateLifePathNode(nodeToSave)
         isNodeEditorPresented = false
         editingNode = nil
     }
@@ -118,27 +173,25 @@ public final class AppState: ObservableObject {
             if newStatus == .achieved {
                 lifePath.nodes[idx].completedAt = ISO8601DateFormatter().string(from: Date())
             }
-            MockDataStore.shared.updateLifePathNode(lifePath.nodes[idx])
+            LocalDataStore.shared.updateLifePathNode(lifePath.nodes[idx])
         }
     }
 
     /// 删除节点
     public func deleteNode(nodeId: String) {
         lifePath.nodes.removeAll(where: { $0.id == nodeId || $0.parentId == nodeId })
-        MockDataStore.shared.deleteLifePathNode(id: nodeId)
+        LocalDataStore.shared.deleteLifePathNode(id: nodeId)
         isNodeEditorPresented = false
         editingNode = nil
     }
 
     /// 从导师建议卡采纳建议：桥接至用户编辑器，由用户亲手确认落地
     public func acceptMentorSuggestion(_ suggestion: MentorSuggestion) {
-        // 标记建议卡为已采纳
-        MockDataStore.shared.updateSuggestionStatus(id: suggestion.id, status: .accepted)
+        LocalDataStore.shared.updateSuggestionStatus(id: suggestion.id, status: .accepted)
         if let idx = mentorMessages.firstIndex(where: { $0.suggestion?.id == suggestion.id }) {
             mentorMessages[idx].suggestion?.status = .accepted
         }
 
-        // 构建预填节点
         let proposedNode = LifePathNode(
             id: UUID().uuidString,
             parentId: lifePath.nodes.first?.id,
@@ -150,7 +203,6 @@ public final class AppState: ObservableObject {
             aiNote: "采纳自导师建议：\(suggestion.reason)"
         )
 
-        // 跳转至 Tab 1 并拉起用户专属编辑器
         self.selectedTab = 0
         self.editingNode = proposedNode
         self.isNodeEditorPresented = true
@@ -158,7 +210,7 @@ public final class AppState: ObservableObject {
 
     /// 暂缓或拒绝建议
     public func updateSuggestionDecision(suggestionId: String, status: SuggestionStatus) {
-        MockDataStore.shared.updateSuggestionStatus(id: suggestionId, status: status)
+        LocalDataStore.shared.updateSuggestionStatus(id: suggestionId, status: status)
         if let idx = mentorMessages.firstIndex(where: { $0.suggestion?.id == suggestionId }) {
             mentorMessages[idx].suggestion?.status = status
         }
@@ -168,22 +220,7 @@ public final class AppState: ObservableObject {
     public func askMentorWithContext(contextTag: String, initialPrompt: String) {
         self.activeContextTag = contextTag
         self.selectedTab = 2 // 切换到导师 Tab
-
-        let userMsg = MentorMessage(
-            sender: "user",
-            content: initialPrompt,
-            relatedContextTag: contextTag
-        )
-        mentorMessages.append(userMsg)
-        MockDataStore.shared.addMentorMessage(userMsg)
-
-        // 异步获取导师回复
-        Task {
-            _ = try? await APIClient.shared.askMentor(question: initialPrompt, contextTag: contextTag)
-            await MainActor.run {
-                self.mentorMessages = MockDataStore.shared.mentorMessages
-            }
-        }
+        sendMessageToMentor(initialPrompt, contextTag: contextTag)
     }
 
     /// 完成一次专注打卡
@@ -199,7 +236,7 @@ public final class AppState: ObservableObject {
             reflectionNote: reflection
         )
         focusSessions.insert(session, at: 0)
-        MockDataStore.shared.addFocusSession(session)
+        LocalDataStore.shared.addFocusSession(session)
         isFocusModalPresented = false
     }
 }

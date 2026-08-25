@@ -39,7 +39,9 @@
 		A100001D2C70000100000001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001D2C70000100000001 /* APIClient.swift */; };
 		A100001E2C70000100000001 /* CalendarSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001E2C70000100000001 /* CalendarSyncService.swift */; };
 		A100001F2C70000100000001 /* CloudIngestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001F2C70000100000001 /* CloudIngestService.swift */; };
-		A10000202C70000100000001 /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000202C70000100000001 /* MockDataStore.swift */; };
+		A10000202C70000100000001 /* DeepSeekAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000202C70000100000001 /* DeepSeekAIService.swift */; };
+		A10000212C70000100000001 /* LocalDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000212C70000100000001 /* LocalDataStore.swift */; };
+		A10000222C70000100000001 /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000222C70000100000001 /* MockDataStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,7 +78,9 @@
 		B100001D2C70000100000001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/APIClient.swift"; sourceTree = "<group>"; };
 		B100001E2C70000100000001 /* CalendarSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/CalendarSyncService.swift"; sourceTree = "<group>"; };
 		B100001F2C70000100000001 /* CloudIngestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/CloudIngestService.swift"; sourceTree = "<group>"; };
-		B10000202C70000100000001 /* MockDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/MockDataStore.swift"; sourceTree = "<group>"; };
+		B10000202C70000100000001 /* DeepSeekAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/DeepSeekAIService.swift"; sourceTree = "<group>"; };
+		B10000212C70000100000001 /* LocalDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/LocalDataStore.swift"; sourceTree = "<group>"; };
+		B10000222C70000100000001 /* MockDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Services/MockDataStore.swift"; sourceTree = "<group>"; };
 		B1FFFFFF2C70000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BNDSCompanion/Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,7 +120,9 @@
 				B100001D2C70000100000001 /* APIClient.swift */,
 				B100001E2C70000100000001 /* CalendarSyncService.swift */,
 				B100001F2C70000100000001 /* CloudIngestService.swift */,
-				B10000202C70000100000001 /* MockDataStore.swift */,
+				B10000202C70000100000001 /* DeepSeekAIService.swift */,
+				B10000212C70000100000001 /* LocalDataStore.swift */,
+				B10000222C70000100000001 /* MockDataStore.swift */,
 				B1FFFFFF2C70000100000001 /* Info.plist */,
 				D10000042C70000100000001 /* Products */,
 			);
@@ -219,7 +225,9 @@
 				A100001D2C70000100000001 /* APIClient.swift in Sources */,
 				A100001E2C70000100000001 /* CalendarSyncService.swift in Sources */,
 				A100001F2C70000100000001 /* CloudIngestService.swift in Sources */,
-				A10000202C70000100000001 /* MockDataStore.swift in Sources */,
+				A10000202C70000100000001 /* DeepSeekAIService.swift in Sources */,
+				A10000212C70000100000001 /* LocalDataStore.swift in Sources */,
+				A10000222C70000100000001 /* MockDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

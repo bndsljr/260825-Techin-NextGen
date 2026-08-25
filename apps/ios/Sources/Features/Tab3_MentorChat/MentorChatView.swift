@@ -1,11 +1,10 @@
 import SwiftUI
 
 /// Tab 3: 【导师】(受邀陪伴与学业规划)
-/// 对话流 + 建议卡片（无保存写权限，采纳跳转回编辑器）
+/// 对话流 + 结构化建议卡片（基于 DeepSeek deepseekv4flashvisionexp 实时大模型）
 public struct MentorChatView: View {
     @EnvironmentObject var appState: AppState
     @State private var inputText: String = ""
-    @State private var isThinking: Bool = false
 
     public init() {}
 
@@ -54,15 +53,17 @@ public struct MentorChatView: View {
                                     .id(message.id)
                             }
 
-                            if isThinking {
-                                HStack(spacing: 6) {
+                            if appState.isMentorThinking {
+                                HStack(spacing: 8) {
                                     ProgressView()
                                         .scaleEffect(0.8)
-                                    Text("导师正在结合你的路径与学业数据进行推演...")
+                                    Text("DeepSeek 导师正在结合你的课表与人生路径进行分析...")
                                         .font(.system(size: 12))
                                         .foregroundColor(.secondary)
                                 }
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 16)
                             }
                         }
                         .padding(16)
@@ -103,14 +104,14 @@ public struct MentorChatView: View {
                             .font(.system(size: 32))
                             .foregroundColor(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .secondary.opacity(0.4) : BNDSColors.crimson)
                     }
-                    .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isThinking)
+                    .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || appState.isMentorThinking)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(BNDSColors.surfaceBackground)
             }
             .background(BNDSColors.groupBackground.ignoresSafeArea())
-            .navigationTitle("AI 导师")
+            .navigationTitle("AI 导师 (DeepSeek)")
             .bndsInlineTitle()
         }
     }
@@ -120,26 +121,7 @@ public struct MentorChatView: View {
         guard !cleanText.isEmpty else { return }
 
         inputText = ""
-        isThinking = true
-
-        let userMsg = MentorMessage(
-            sender: "user",
-            content: cleanText,
-            relatedContextTag: appState.activeContextTag
-        )
-        appState.mentorMessages.append(userMsg)
-        MockDataStore.shared.addMentorMessage(userMsg)
-
-        Task {
-            _ = try? await APIClient.shared.askMentor(
-                question: cleanText,
-                contextTag: appState.activeContextTag
-            )
-            await MainActor.run {
-                self.appState.mentorMessages = MockDataStore.shared.mentorMessages
-                self.isThinking = false
-            }
-        }
+        appState.sendMessageToMentor(cleanText, contextTag: appState.activeContextTag)
     }
 }
 
