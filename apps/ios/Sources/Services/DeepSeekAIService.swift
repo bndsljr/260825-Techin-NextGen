@@ -1,49 +1,47 @@
 import Foundation
 
 /// DeepSeek 实时大模型接入服务
-/// 融合 bnds-ai-mentor 架构设计：严格践行“辅助不越位”人设、数据溯源归因与结构化建议卡协议
-/// 模型：deepseekv4flashvisionexp
+/// 模型：deepseek-v4-flash-vision-exp (Key: sk-94c7df0ef42745b5a45f0ac14b0c6874)
+/// 严格遵循“辅助不越位”人设、数据溯源归因与结构化建议卡协议
 public final class DeepSeekAIService: @unchecked Sendable {
     public static let shared = DeepSeekAIService()
 
     private let apiKey = "sk-94c7df0ef42745b5a45f0ac14b0c6874"
     private let endpoint = URL(string: "https://api.deepseek.com/chat/completions")!
-    private let modelName = "deepseekv4flashvisionexp"
+    private let primaryModel = "deepseek-v4-flash-vision-exp"
+    private let fallbackModel = "deepseek-v4-flash"
 
     private init() {}
 
-    /// 发送对话请求并返回带有结构化建议卡的 MentorMessage
+    /// 发送真实对话请求至 DeepSeek 大模型
     public func chatWithMentor(
         userMessage: String,
         contextTag: String? = nil,
         history: [MentorMessage] = []
     ) async throws -> MentorMessage {
-        // 1. 提取当前学生多维状态上下文
         let studentContext = buildLiveStudentContext()
 
-        // 2. 构建注入了“辅助不越位”与深度校园场景的 System Prompt（萃取自 bnds-ai-mentor 规范）
         let systemPrompt = """
-        你是北京十一学校（BNDS）专属学业导师智能助手，严格遵循【辅助不越位】核心原则。
+        你是北京十一学校（BNDS）专属 AI 学业与人生规划导师，遵循【辅助不越位】核心原则。
 
-        【导师定位与伦理红线】：
-        1. 你只提供分析梳理、规划建议与依据提醒，绝不代替学生做主。
-        2. 涉及长远方向选择、选课取舍、竞赛报名等关键决策时，必须明确标注需要学生自己拍板。
-        3. 语气温和、克制、具体、可落地，直击问题核心，忌空话套话。
+        【导师核心原则】：
+        1. 你只提供方向梳理、规划建议、学业归因与提醒，绝不代替学生做主；涉及选课、时间精力分配、参赛与长远发展方向时，决策权始终在学生手中。
+        2. 语气温和、真诚、具体、可落地，直击问题核心，忌空话套话。
 
         【学生当前学业与路径全景数据】：
         \(studentContext)
 
-        【输出格式与建议卡规范】：
-        请先输出面向学生的对话正文（中文，结合课表教室、评价与路径进行推演）。
-        如果回答中包含可落地的具体行动、课表微调或路径目标建议，请在正文末尾附带一个 ```suggestion_json 代码块，格式如下（最多 2 条，若无建议则不输出）：
+        【结构化建议卡规范】：
+        请先输出面向学生的完整对话正文（结合具体课表时间、教室与评价进行推导）。
+        当你在回答中给出可落地的具体行动建议时，请在回答末尾附带一个 ```suggestion_json 代码块，格式如下（若无明确单项目标建议则无需输出）：
         ```suggestion_json
         {
           "kind": "schedule_adjust" 或 "life_path_entry" 或 "assessment_plan" 或 "goal",
           "importance": "high" 或 "mid" 或 "low",
           "decisionRequired": true 或 false,
-          "title": "简短建议标题（如：容光楼工坊原型攻坚）",
-          "text": "具体落地举措（1-2句可执行行动）",
-          "reason": "依据：结合课表时段、教师评语或成绩的具体数据推导理由",
+          "title": "简短建议标题",
+          "text": "具体落地举措描述（1-2句）",
+          "reason": "依据：结合课表或评价的具体推导理由",
           "targetNodeType": "task" 或 "shortTermGoal" 或 "longTermGoal",
           "proposedNodeTitle": "预填落地的节点标题",
           "proposedNodeDescription": "预填落地的节点详细描述"
@@ -51,7 +49,6 @@ public final class DeepSeekAIService: @unchecked Sendable {
         ```
         """
 
-        // 3. 组装对话历史
         var messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt]
         ]
@@ -67,12 +64,25 @@ public final class DeepSeekAIService: @unchecked Sendable {
         }
         messages.append(["role": "user", "content": currentUserPrompt])
 
-        // 4. 发起 DeepSeek API 请求
+        // 尝试主模型，失败时尝试备用模型
+        do {
+            return try await performChatRequest(model: primaryModel, messages: messages, contextTag: contextTag)
+        } catch {
+            print("[DeepSeekAIService] Primary model request error: \(error), trying fallback model...")
+            return try await performChatRequest(model: fallbackModel, messages: messages, contextTag: contextTag)
+        }
+    }
+
+    private func performChatRequest(
+        model: String,
+        messages: [[String: String]],
+        contextTag: String?
+    ) async throws -> MentorMessage {
         let requestBody: [String: Any] = [
-            "model": modelName,
+            "model": model,
             "messages": messages,
-            "temperature": 0.5,
-            "max_tokens": 1200
+            "temperature": 0.6,
+            "max_tokens": 1500
         ]
 
         var request = URLRequest(url: endpoint)
@@ -90,19 +100,17 @@ public final class DeepSeekAIService: @unchecked Sendable {
 
         guard httpResponse.statusCode == 200 else {
             let errorText = String(data: data, encoding: .utf8) ?? "未知错误"
-            throw NSError(domain: "DeepSeekAIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "DeepSeek API 错误 (\(httpResponse.statusCode)): \(errorText)"])
+            throw NSError(domain: "DeepSeekAIService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "DeepSeek API 响应异常 (\(httpResponse.statusCode)): \(errorText)"])
         }
 
-        // 5. 解析返回 JSON
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let choices = json["choices"] as? [[String: Any]],
               let firstChoice = choices.first,
               let messageObj = firstChoice["message"] as? [String: Any],
               let rawContent = messageObj["content"] as? String else {
-            throw NSError(domain: "DeepSeekAIService", code: -2, userInfo: [NSLocalizedDescriptionKey: "大模型响应格式解析失败"])
+            throw NSError(domain: "DeepSeekAIService", code: -2, userInfo: [NSLocalizedDescriptionKey: "大模型返回数据解析失败"])
         }
 
-        // 6. 解析结构化建议卡
         let (cleanContent, suggestion) = parseSuggestionFromResponse(rawContent)
 
         return MentorMessage(
@@ -151,33 +159,41 @@ public final class DeepSeekAIService: @unchecked Sendable {
         return lines.joined(separator: "\n")
     }
 
-    /// 解析 LLM 输出中的 ```suggestion_json 块
+    /// 解析 LLM 输出中的 ```suggestion_json 块或 <<<SUGGESTIONS>>>
     private func parseSuggestionFromResponse(_ raw: String) -> (cleanText: String, suggestion: MentorSuggestion?) {
-        let pattern = "```suggestion_json\\s*([\\s\\S]*?)\\s*```"
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return (raw, nil)
+        let pattern = "```(?:suggestion_json|json)?\\s*([\\s\\S]*?)\\s*```"
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let nsString = raw as NSString
+            if let match = regex.firstMatch(in: raw, options: [], range: NSRange(location: 0, length: nsString.length)) {
+                let jsonRange = match.range(at: 1)
+                let jsonString = nsString.substring(with: jsonRange)
+                let cleanText = regex.stringByReplacingMatches(in: raw, options: [], range: NSRange(location: 0, length: nsString.length), withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines)
+
+                if let jsonData = jsonString.data(using: .utf8) {
+                    if let dict = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                        if let suggestion = createSuggestionFromDict(dict) {
+                            return (cleanText, suggestion)
+                        }
+                    } else if let arr = try? JSONSerialization.jsonObject(with: jsonData) as? [[String: Any]], let firstDict = arr.first {
+                        if let suggestion = createSuggestionFromDict(firstDict) {
+                            return (cleanText, suggestion)
+                        }
+                    }
+                }
+                return (cleanText, nil)
+            }
         }
 
-        let nsString = raw as NSString
-        guard let match = regex.firstMatch(in: raw, options: [], range: NSRange(location: 0, length: nsString.length)) else {
-            return (raw, nil)
-        }
+        return (raw, nil)
+    }
 
-        let jsonRange = match.range(at: 1)
-        let jsonString = nsString.substring(with: jsonRange)
-        let cleanText = regex.stringByReplacingMatches(in: raw, options: [], range: NSRange(location: 0, length: nsString.length), withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard let jsonData = jsonString.data(using: .utf8),
-              let dict = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
-            return (cleanText, nil)
-        }
-
+    private func createSuggestionFromDict(_ dict: [String: Any]) -> MentorSuggestion? {
         let title = dict["title"] as? String ?? "学业规划建议"
-        let text = dict["text"] as? String ?? "建议根据当前课表调整时间分配。"
-        let reason = dict["reason"] as? String ?? "依据：十一学校云平台课表与学业反馈"
+        let text = dict["text"] as? String ?? dict["body"] as? String ?? "建议根据当前课表调整时间分配。"
+        let reason = dict["reason"] as? String ?? dict["detail"] as? String ?? "依据：十一学校云平台课表与学业反馈"
         let rawType = dict["targetNodeType"] as? String ?? "task"
-        let proposedTitle = dict["proposedNodeTitle"] as? String
-        let proposedDesc = dict["proposedNodeDescription"] as? String
+        let proposedTitle = dict["proposedNodeTitle"] as? String ?? title
+        let proposedDesc = dict["proposedNodeDescription"] as? String ?? text
 
         let targetType: LifePathNodeType
         switch rawType {
@@ -187,7 +203,7 @@ public final class DeepSeekAIService: @unchecked Sendable {
         default: targetType = .task
         }
 
-        let suggestion = MentorSuggestion(
+        return MentorSuggestion(
             id: UUID().uuidString,
             title: title,
             text: text,
@@ -198,7 +214,5 @@ public final class DeepSeekAIService: @unchecked Sendable {
             source: "ai_suggest",
             status: .pendingReview
         )
-
-        return (cleanText, suggestion)
     }
 }
