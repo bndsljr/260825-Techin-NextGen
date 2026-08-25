@@ -1,11 +1,11 @@
 /* ============================================================
  * 十一校园助手 · BNDS Campus Companion
  * data.js — 真实十一学校数据 + 本地持久化
- * 数据对齐 packages/data-ingest 爬虫与 iOS 端 bnds_initial_data.json
+ * 数据对齐 packages/data-ingest 真实抓取与 iOS 客户端
  * ============================================================ */
 
 const BNDS = (function () {
-  const STORE_KEY = "bnds.store.v2";
+  const STORE_KEY = "bnds.store.v3";
 
   const uid = () =>
     (globalThis.crypto && crypto.randomUUID)
@@ -59,7 +59,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "fdd50ce3-8dc9-4e46-a0d0-f78241110661:33",
     "name": "生物ⅡA-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S101A",
     "day_of_week": 3,
     "start_time": "09:50",
@@ -73,7 +73,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "fdd50ce3-8dc9-4e46-a0d0-f78241110661:44",
     "name": "生物ⅡA-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S101A",
     "day_of_week": 4,
     "start_time": "10:45",
@@ -87,7 +87,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "fdd50ce3-8dc9-4e46-a0d0-f78241110661:22",
     "name": "生物ⅡA-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S101A",
     "day_of_week": 2,
     "start_time": "08:55",
@@ -101,7 +101,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "c5320b5e-99b9-40b0-b6c1-bcea530f8de2:32",
     "name": "化学ⅡA-7",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S212A",
     "day_of_week": 3,
     "start_time": "08:55",
@@ -115,7 +115,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "c5320b5e-99b9-40b0-b6c1-bcea530f8de2:19",
     "name": "化学ⅡA-7",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S212A",
     "day_of_week": 1,
     "start_time": "15:40",
@@ -129,7 +129,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "c5320b5e-99b9-40b0-b6c1-bcea530f8de2:49",
     "name": "化学ⅡA-7",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S212A",
     "day_of_week": 4,
     "start_time": "15:40",
@@ -143,7 +143,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "c5320b5e-99b9-40b0-b6c1-bcea530f8de2:21",
     "name": "化学ⅡA-7",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S212A",
     "day_of_week": 2,
     "start_time": "08:00",
@@ -157,7 +157,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "88763f02-94ea-4b92-9765-3a2a937e3796:23",
     "name": "物理ⅢA-2",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S319A",
     "day_of_week": 2,
     "start_time": "09:50",
@@ -171,7 +171,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "88763f02-94ea-4b92-9765-3a2a937e3796:14",
     "name": "物理ⅢA-2",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S319A",
     "day_of_week": 1,
     "start_time": "10:45",
@@ -185,7 +185,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "88763f02-94ea-4b92-9765-3a2a937e3796:45",
     "name": "物理ⅢA-2",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S319A",
     "day_of_week": 4,
     "start_time": "11:40",
@@ -199,7 +199,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "afec51c5-25e1-466b-b6ad-85535541e19a:39",
     "name": "高中语文Ⅱ-a14",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S304A",
     "day_of_week": 3,
     "start_time": "15:40",
@@ -213,7 +213,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "afec51c5-25e1-466b-b6ad-85535541e19a:11",
     "name": "高中语文Ⅱ-a14",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S304A",
     "day_of_week": 1,
     "start_time": "08:00",
@@ -227,7 +227,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "afec51c5-25e1-466b-b6ad-85535541e19a:24",
     "name": "高中语文Ⅱ-a14",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S304A",
     "day_of_week": 2,
     "start_time": "10:45",
@@ -241,7 +241,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "afec51c5-25e1-466b-b6ad-85535541e19a:42",
     "name": "高中语文Ⅱ-a14",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S304A",
     "day_of_week": 4,
     "start_time": "08:55",
@@ -255,7 +255,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "afec51c5-25e1-466b-b6ad-85535541e19a:53",
     "name": "高中语文Ⅱ-a14",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S304A",
     "day_of_week": 5,
     "start_time": "09:50",
@@ -269,7 +269,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "7d2f44ce-c163-4d56-9813-b88cf153ea4b:41",
     "name": "高中英语Ⅱ-a3",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S310A",
     "day_of_week": 4,
     "start_time": "08:00",
@@ -283,7 +283,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "7d2f44ce-c163-4d56-9813-b88cf153ea4b:12",
     "name": "高中英语Ⅱ-a3",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S310A",
     "day_of_week": 1,
     "start_time": "08:55",
@@ -297,7 +297,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "7d2f44ce-c163-4d56-9813-b88cf153ea4b:54",
     "name": "高中英语Ⅱ-a3",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S310A",
     "day_of_week": 5,
     "start_time": "10:45",
@@ -311,7 +311,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "7d2f44ce-c163-4d56-9813-b88cf153ea4b:37",
     "name": "高中英语Ⅱ-a3",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S310A",
     "day_of_week": 3,
     "start_time": "13:30",
@@ -325,7 +325,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "d10b977f-ee88-41b7-8acc-7cae277d9fd4:52",
     "name": "数学Ⅲ-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S218A",
     "day_of_week": 5,
     "start_time": "08:55",
@@ -339,7 +339,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "d10b977f-ee88-41b7-8acc-7cae277d9fd4:38",
     "name": "数学Ⅲ-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S218A",
     "day_of_week": 3,
     "start_time": "14:25",
@@ -353,7 +353,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "d10b977f-ee88-41b7-8acc-7cae277d9fd4:43",
     "name": "数学Ⅲ-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S218A",
     "day_of_week": 4,
     "start_time": "09:50",
@@ -367,7 +367,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "d10b977f-ee88-41b7-8acc-7cae277d9fd4:25",
     "name": "数学Ⅲ-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S218A",
     "day_of_week": 2,
     "start_time": "11:40",
@@ -381,7 +381,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "d10b977f-ee88-41b7-8acc-7cae277d9fd4:13",
     "name": "数学Ⅲ-4",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "S218A",
     "day_of_week": 1,
     "start_time": "09:50",
@@ -465,7 +465,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "216a1f34-10b1-4818-ad72-1cfbae3203fd:35",
     "name": "皮划艇-6",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "游泳馆皮划艇场地",
     "day_of_week": 3,
     "start_time": "11:40",
@@ -479,7 +479,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "216a1f34-10b1-4818-ad72-1cfbae3203fd:51",
     "name": "皮划艇-6",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "游泳馆皮划艇场地",
     "day_of_week": 5,
     "start_time": "08:00",
@@ -493,7 +493,7 @@ const BNDS = (function () {
     "source": "cloud",
     "external_id": "216a1f34-10b1-4818-ad72-1cfbae3203fd:28",
     "name": "皮划艇-6",
-    "teacher": "任课教师",
+    "teacher": "十一名师",
     "room": "游泳馆皮划艇场地",
     "day_of_week": 2,
     "start_time": "14:25",
@@ -504,7 +504,7 @@ const BNDS = (function () {
   }
 ];
 
-  /* ---------- 种子：人生路径 ---------- */
+  /* ---------- 种子：人生路径（8 个真实节点） ---------- */
   const seedPath = {
     id: "path-001",
     user_id: seedUser.id,
@@ -649,8 +649,11 @@ const BNDS = (function () {
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
-        mem = JSON.parse(raw);
-        return mem;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.user && parsed.user.name === "李佳睿" && parsed.courses && parsed.courses.length >= 20) {
+          mem = parsed;
+          return mem;
+        }
       }
     } catch (e) { /* ignore */ }
     mem = buildSeed();
@@ -698,7 +701,7 @@ const BNDS = (function () {
   /* ---------- 帮助函数 ---------- */
   function slotsForDate(dateISO, data) {
     const d = new Date(dateISO + "T00:00:00");
-    const day = d.getDay(); // 0-6
+    const day = d.getDay();
     const dow = day === 0 ? 7 : day;
     const parity = weekParityFor(dateISO);
     const slots = [];
@@ -741,8 +744,13 @@ const BNDS = (function () {
     return isoDay(d);
   }
 
+  const API = {
+    base: "https://api.bnds.example.com/api/v1",
+    provider: "local_store",
+  };
+
   return {
     uid, now, todayISO, isoDay, pad, addDays, startOfWeek, slotsForDate, weekParityFor,
-    INTERESTS, COURSE_COLORS, store,
+    INTERESTS, COURSE_COLORS, store, API,
   };
 })();
