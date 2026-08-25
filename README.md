@@ -183,21 +183,32 @@
 
 ---
 
-## 十二、目录结构（规划）
+## 十二、目录结构
 
 ```
-2611-campus-companion/        # 待正式创建
+<repo root>
 ├── README.md                 # 本文件
-├── docs/                     # 调研、设计、PRD
+├── docs/                     # 📚 对接文档（见 docs/README.md）
+│   ├── architecture.md       # 总体架构与模块边界
+│   ├── data-model.md         # 统一数据模型（对接基石）
+│   ├── api-contract.md       # 后端统一 API 契约（客户端基准）
+│   ├── events.md             # 模块间事件契约
+│   ├── module-data-ingest.md # 数据接入模块
+│   ├── module-scheduler.md   # 课表 → 日历
+│   ├── module-focus.md       # 专注模式
+│   ├── module-path.md        # 人生路径领域模型
+│   └── module-ai.md          # AI 大模型接入
 ├── apps/
-│   ├── web/                  # 前端（Dashboard / 日程 / 专注 / AI 对话 / Onboarding）
-│   └── api/                  # 后端统一服务
+│   ├── web/                  # 前端 Web（Dashboard / 日程 / 专注 / AI 对话 / Onboarding）
+│   ├── api/                  # 后端统一服务
+│   └── ios/                  # iOS 移动端
 ├── packages/
-│   ├── data-ingest/          # 多来源数据接入与归一化
+│   ├── data-ingest/          # 多来源数据接入与归一化（云平台 / ManageBac）
 │   ├── scheduler/            # 课表解析 / 日历同步
 │   ├── focus/                # 专注模式
-│   ├── path/                 # 人生路径领域模型（兴趣/目标/节点状态）
-│   └── ai/                   # LLM / RAG / Prompt 编排（辅助不越位）
+│   ├── path/                 # 人生路径领域模型（兴趣 / 目标 / 节点状态）
+│   ├── ai/                   # LLM / RAG / Prompt 编排（辅助不越位）
+│   └── contracts/            # 共享数据模型 / 类型定义
 └── infra/                    # 部署、配置
 ```
 
@@ -227,8 +238,8 @@
 ## 附：下一步建议
 
 1. 先做 **Phase 0 数据调研** —— 确认云平台 / ManageBac 数据是否可接入；
-2. 确定 MVP 范围，优先打通"课表 → 日历"这条最直观的链路；
+2. 各端按 `docs/` 对接文档开始搭建骨架与接口；
 3. 明确技术选型与账号 / 存储方案；
-4. 设计**人生路径**领域模型与 Onboarding 共创流程（这是产品灵魂）。
+4. 按 `packages/path` + Onboarding 共创流程细化产品原型（这是产品灵魂）。
 
 *本大纲为初版，随调研与决策持续迭代。*
