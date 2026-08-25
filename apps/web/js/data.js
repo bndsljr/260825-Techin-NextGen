@@ -151,6 +151,14 @@ const BNDS = (function () {
       focusSessions: seedFocus,
       path: seedPath,
       mentorHistory: [],
+      interestPillars: INTERESTS.slice(),
+      isOnboardingCompleted: false,
+      promptShortcuts: [
+        { id: "plan", label: "帮我规划本周" },
+        { id: "grade", label: "分析我的成绩趋势" },
+        { id: "mentor", label: "聊聊升学方向" },
+        { id: "focus", label: "如何提升专注" },
+      ],
     };
   }
 

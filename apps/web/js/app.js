@@ -1,24 +1,20 @@
-/* ============================================================
- * 十一校园助手 · BNDS Campus Companion
- * app.js — 路由 + 五大模块渲染 + Onboarding 共创向导
- * 原则：AI 是导师不是决策者；待定是常态；建议可拒绝；透明可溯源。
- * ============================================================ */
-
 (function () {
-  const { store, INTERESTS, uid, now, todayISO, isoDay, pad, addDays, startOfWeek, slotsForDate, weekParityFor, COURSE_COLORS } = BNDS;
+  const B = BNDS;
+  const { store, INTERESTS, uid, now, todayISO, pad, slotsForDate } = B;
 
-  const state = {
-    route: "dashboard",
-    weekStart: startOfWeek(todayISO()),
-    focus: { session: null, timerId: null, remaining: 0, total: 0 },
-    mentor: { messages: [] },
+  const S = {
+    tab: 0,
+    seg: "path",
+    editingNode: null,
+    draftFromSuggestion: null,
+    activeContextTag: null,
+    focus: { running: false, remaining: 0, total: 0, timerId: null },
+    mentor: { contextTag: null, typing: false },
   };
 
-  /* ---------- DOM helpers ---------- */
   const $ = (sel, root) => (root || document).querySelector(sel);
   const view = $("#view");
-  const esc = (s) =>
-    String(s == null ? "" : s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 
   let toastTimer = null;
   function toast(msg, type) {
@@ -28,732 +24,586 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.add("hidden"), 2400);
   }
-  function err(msg) { toast(msg, "danger"); }
+  function persistToast(msg, ok) { toast(msg, ok ? "ok" : "warn"); }
 
-  /* ============================================================
-   * 路由
-   * ============================================================ */
-  function navigate(route) {
-    state.route = route;
-    setNav(route);
-    const map = {
-      dashboard: renderDashboard,
-      schedule: renderSchedule,
-      focus: renderFocus,
-      mentor: renderMentor,
-      "life-path": renderLifePath,
-      onboarding: renderOnboarding,
-      home: renderDashboard,
-    };
-    (map[route] || renderDashboard)();
-    window.scrollTo({ top: 0 });
-    closeSidebar();
+  const statusMeta = {
+    in_progress: { label: "进行中", cls: "in-progress", emoji: "🟢" },
+    achieved: { label: "已达成", cls: "achieved", emoji: "✅" },
+    pending: { label: "待定", cls: "pending", emoji: "⏳" },
+    abandoned: { label: "已放弃", cls: "abandoned", emoji: "🚫" },
+  };
+  const typeLabel = {
+    vision: "愿景", long_term_goal: "长期目标", short_term_goal: "短期目标",
+    task: "任务", interest: "兴趣板块", note: "备注",
+  };
+  function badge(status) {
+    const m = statusMeta[status] || { label: status, cls: "", emoji: "•" };
+    return '<span class="badge ' + m.cls + '"><span class="dot"></span>' + m.emoji + " " + m.label + "</span>";
   }
-  function setNav(route) {
-    document.querySelectorAll(".nav-link").forEach((a) => {
-      a.classList.toggle("active", a.dataset.route === route);
-    });
-  }
+  function emptyBox(emo, text) { return '<div class="empty"><div class="emo">' + emo + "</div>" + esc(text) + "</div>"; }
 
+  /* ---------- Shell & nav ---------- */
   function renderShell() {
     const d = store.get();
     $("#topbarUser").textContent = d.user.name + " · 高一";
     $("#sidebarFoot").innerHTML =
-      '<div class="foot-line"><span>数据来源</span><span class="tag">Mock</span></div>' +
-      '<div class="foot-line"><span>AI 边界</span><span class="tag accent">只建议</span></div>' +
-      '<div class="foot-line"><span style="margin-top:6px">🧭 决策权永远在人</span></div>';
+      '<div class="foot-line"><span>数据来源</span><span class="tag primary">Mock</span></div>' +
+      '<div class="foot-line"><span>AI 边界</span><span class="tag accent">只建议不写</span></div>' +
+      '<div>🫵 决策权永远在你</div>';
+    document.querySelectorAll(".nav-link").forEach((a) => {
+      a.addEventListener("click", () => setTab(parseInt(a.dataset.tab, 10)));
+    });
+    $("#menuBtn").addEventListener("click", () => { $("#sidebar").classList.add("open"); $("#backdrop").classList.add("show"); });
+    $("#backdrop").addEventListener("click", () => { $("#sidebar").classList.remove("open"); $("#backdrop").classList.remove("show"); });
   }
-
-  function openSidebar() { $("#sidebar").classList.add("open"); $("#backdrop").classList.add("show"); }
+  function setTab(n) {
+    S.tab = n;
+    document.querySelectorAll(".nav-link").forEach((a) => a.classList.toggle("active", parseInt(a.dataset.tab, 10) === n));
+    closeSidebar();
+    renderMain();
+  }
   function closeSidebar() { $("#sidebar").classList.remove("open"); $("#backdrop").classList.remove("show"); }
-  function bindSidebar() {
-    $("#menuBtn").addEventListener("click", openSidebar);
-    $("#backdrop").addEventListener("click", closeSidebar);
-    document.querySelectorAll(".nav-link").forEach((a) => a.addEventListener("click", () => navigate(a.dataset.route)));
+  function renderMain() {
+    if (S.tab === 0) renderMe();
+    else if (S.tab === 1) renderToday();
+    else renderMentor();
+    window.scrollTo({ top: 0 });
   }
 
-  /* ============================================================
-   * 1. Dashboard 概览
-   * ============================================================ */
-  function todayCourses(slots) {
-    return slots.filter((s) => s.kind !== "break");
+  /* ---------- 我 : 路径 / 成长 ---------- */
+  function renderMe() {
+    const d = store.get();
+    const segHTML = '<div class="seg" id="segBox"><button data-seg="path" class="' + (S.seg === "path" ? "active" : "") + '">路径</button><button data-seg="growth" class="' + (S.seg === "growth" ? "active" : "") + '">成长</button></div>';
+    const head = '<div class="page-head"><div><div class="page-title">我</div><div class="page-sub">' + esc(d.user.name) + " · 个人核心 · 人生路径与成长账本</div></div>" + segHTML + "</div>";
+    view.innerHTML = head + (S.seg === "path" ? renderPathBody(d) : renderGrowthBody(d));
+    const segs = document.querySelectorAll("[data-seg]");
+    segs.forEach((b) => (b.onclick = () => { S.seg = b.dataset.seg; renderMe(); }));
+    bindLifePathActions();
+    bindGrowthActions();
   }
-  function pathStats(path) {
-    const nodes = path.nodes;
-    return {
-      total: nodes.length,
-      achieved: nodes.filter((n) => n.status === "achieved").length,
-      inProgress: nodes.filter((n) => n.status === "in_progress").length,
-      pending: nodes.filter((n) => n.status === "pending").length,
-    };
+
+  function renderPathBody(d) {
+    const nodes = d.path.nodes.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+    const counts = { in_progress: 0, achieved: 0, pending: 0, abandoned: 0 };
+    nodes.forEach((n) => (counts[n.status] = (counts[n.status] || 0) + 1));
+    const list = nodes.length
+      ? nodes.map((n) => nodeCardHTML(n)).join("")
+      : emptyBox("🧭", "还没有节点，点右上「添加节点」开始，或先走完 Onboarding");
+    return '<div class="card"><div class="card-head"><span class="card-title">人生路径</span><button class="btn sm" id="addNode">+ 添加节点</button></div>' +
+      '<div class="text-soft" style="font-size:13px;margin-bottom:14px">' +
+      '<span class="tag primary">进行中 ' + counts.in_progress + '</span> ' +
+      '<span class="tag accent">已达成 ' + counts.achieved + '</span> ' +
+      '<span class="tag warn">待定 ' + counts.pending + '</span> ' +
+      '<span class="tag muted">已放弃 ' + counts.abandoned + '</span></div>' +
+      '<div class="timeline">' + list + "</div></div>" +
+      '<div class="ob-note" style="background:var(--oxford-soft);color:var(--oxford)">🫵 状态四态平等，任何节点都可标「待定」、暂停或推翻；AI 永远只帮你梳理。</div>';
+  }
+
+  function nodeCardHTML(n) {
+    const m = statusMeta[n.status] || {};
+    return '<div class="node-item ' + n.status + '"><div class="node-card">' +
+      '<div class="node-type">' + esc(typeLabel[n.type] || n.type) + "</div>" +
+      '<div class="node-title">' + esc(n.title) + "</div>" +
+      (n.description ? '<div class="node-desc">' + esc(n.description) + "</div>" : "") +
+      (n.ai_note ? '<div class="node-foot"><span class="note">AI 依据：' + esc(n.ai_note) + "</span></div>" : "") +
+      '<div class="node-foot">' + badge(n.status) +
+      (n.due_at ? '<span class="text-faint" style="font-size:12px">截止 ' + esc(n.due_at) + "</span>" : "") +
+      '<span style="margin-left:auto;display:flex;gap:8px">' +
+      '<button class="where-btn" data-qnode="' + n.id + '">🧑‍🏫 问导师</button>' +
+      '<button class="btn sm ghost" data-edit="' + n.id + '">编辑</button></span></div></div></div>';
+  }
+
+  function bindLifePathActions() {
+    const add = $("#addNode");
+    if (add) add.onclick = () => openNodeEditor(null);
+    document.querySelectorAll("[data-edit]").forEach((b) => (b.onclick = () => {
+      const d = store.get();
+      openNodeEditor(d.path.nodes.find((x) => x.id === b.dataset.edit));
+    }));
+    document.querySelectorAll("[data-qnode]").forEach((b) => (b.onclick = () => {
+      const d = store.get();
+      const n = d.path.nodes.find((x) => x.id === b.dataset.qnode);
+      if (n) askMentor("路径节点「" + n.title + "」", { kind: "node", node: n });
+    }));
+  }
+
+  function renderGrowthBody(d) {
+    const avg = gradeAvg(d.grades);
+    const nAssess = d.assessment.length;
+    const nDone = d.path.nodes.filter((n) => n.status === "achieved").length;
+    const nPending = d.path.nodes.filter((n) => n.status === "pending").length;
+    const stats =
+      '<div class="grid grid-4" style="grid-template-columns:repeat(4,1fr)">' +
+      growthStat("📊", "blue", avg, "平均成绩") +
+      growthStat("📝", "purple", String(nAssess), "过程性评价") +
+      growthStat("✅", "green", String(nDone), "已达成目标") +
+      growthStat("⏳", "orange", String(nPending), "待定目标") + "</div>";
+
+    const assessHTML = d.assessment.length
+      ? d.assessment.slice().reverse().map((a) => {
+          const g = gradeMeta(a.grade_level);
+          return '<div class="timeline-slot" style="border-bottom:none"><div class="t-line" style="background:' + g.color + '"></div><div class="t-main"><div class="t-title">' + esc(dimensionLabel(a.dimension)) + " · " + g.label + '</div><div class="t-meta">' + esc(a.comment) + " · " + esc(a.assessed_at) + '</div><button class="where-btn" data-qassess="' + a.id + '">🧑‍🏫 问导师</button></div></div>';
+        }).join("")
+      : emptyBox("📝", "还没有评价记录");
+
+    const gradeHTML = d.grades.length
+      ? d.grades.map((g) => '<div class="timeline-slot" style="border-bottom:none"><div class="t-line" style="background:var(--in-progress)"></div><div class="t-main"><div class="t-title">' + esc(g.exam_name) + " · <b>" + g.score + "</b> / " + g.max_score + '</div><div class="t-meta">' + esc(g.exam_date) + " · 权重 " + g.weight + '</div></div></div>').join("")
+      : emptyBox("📈", "还没有成绩记录");
+
+    return '<div class="grid grid-2">' +
+      '<div class="card"><div class="card-head"><span class="card-title">成长概览</span></div>' + stats + "</div>" +
+      '<div class="card"><div class="card-head"><span class="card-title">过程性评价</span></div><div>' + assessHTML + "</div></div>" +
+      '<div class="card" style="grid-column:1/-1"><div class="card-head"><span class="card-title">成绩</span></div><div>' + gradeHTML + "</div></div>" +
+      "</div>";
+  }
+  function growthStat(emo, cls, val, lbl) {
+    return '<div class="card stat-card"><div class="icon ' + cls + '">' + emo + '</div><div><div class="val">' + val + '</div><div class="lbl">' + lbl + "</div></div></div>";
   }
   function gradeAvg(grades) {
     if (!grades.length) return "--";
-    const avg = grades.reduce((a, g) => a + (g.score || 0), 0) / grades.length;
-    return avg.toFixed(0);
+    return (grades.reduce((a, g) => a + (g.score || 0), 0) / grades.length).toFixed(0);
   }
-  function renderDashboard() {
+  function gradeMeta(lv) {
+    const map = {
+      excellent: { label: "优秀", color: "#21B070" },
+      good: { label: "良好", color: "#2E8AFF" },
+      pass: { label: "合格", color: "#F59E1E" },
+      needs_improvement: { label: "待改进", color: "#848FA3" },
+    };
+    return map[lv] || { label: lv, color: "#848FA3" };
+  }
+  function dimensionLabel(dim) {
+    const map = { participation: "课堂参与", homework: "作业", quiz: "测验", project: "项目", conduct: "品行" };
+    return map[dim] || dim;
+  }
+  function bindGrowthActions() {
+    document.querySelectorAll("[data-qassess]").forEach((b) => (b.onclick = () => {
+      const d = store.get();
+      const a = d.assessment.find((x) => x.id === b.dataset.qassess);
+      if (a) askMentor("评价·" + dimensionLabel(a.dimension) + "：" + a.comment, { kind: "assessment", assessment: a });
+    }));
+  }
+
+  /* ---------- 今日 ---------- */
+  function renderToday() {
     const d = store.get();
     const t = todayISO();
-    const slots = slotsForDate(t, d);
-    const todayCourses = slots.filter((s) => s.kind !== "break");
-    const ps = pathStats(d.path);
-    const avg = gradeAvg(d.grades);
-    const minutesToday = sumFocusToday(d, t);
+    const slots = slotsForDate(t, d).filter((s) => s.kind !== "break");
+    const goal = todayGoal(d);
+    const minToday = sumFocusMinutes(d, t);
+    const focusWins = slots.filter((s) => s.kind === "focus");
 
-    const next = todayCourses[0] || null;
-    const h = "<div class='hero'>" +
-      "<div><h1>早上好，" + esc(d.user.name) + " 👋</h1><p>" +
-        (next ? "下一节课：<b>" + esc(next.title) + "</b> " + esc(next.room || "") + " · " + esc(next.start_at.slice(11, 16)) : "今天没有课程，自由安排") +
-      "</p></div>" +
-      "<button class='btn hero-action' data-go='focus'>开始专注 →</button></div>";
+    const goalHTML = goal
+      ? '<div class="card"><div class="card-head"><span class="card-title">今日目标</span>' + badge(goal.status) + '</div><div class="today-goal"><span class="g-ico">🎯</span><div><b>' + esc(goal.title) + "</b>" + (goal.due_at ? '<div class="text-soft" style="font-size:12.5px">截止 ' + esc(goal.due_at) + "</div>" : "") + "</div></div></div>"
+      : "";
 
-    const stats =
-      '<div class="grid grid-4">' +
-      statCard("今日课程", String(todayCourses.length), "节", upClass("")) +
-      statCard("本周专注", formatMin(minutesToday), "今天", upClass("<span>已打卡</span>")) +
-      statCard("平均成绩", String(avg), "分", upClass("稳中有升")) +
-      statCard("路径进度", ps.achieved + "/" + ps.total, "已达成", upClass(Math.round((ps.achieved / (ps.total || 1)) * 100) + "%")) +
-      "</div>";
+    const timeline = slots.length
+      ? slots.map((s) => timelineSlotHTML(s)).join("")
+      : emptyBox("🌤️", "今天没有排课，自由安排");
 
-    const courseList = todayCourses.length
-      ? todayCourses.map((s) => "<div class='slot-card'><div class='slot-time'>" + s.start_at.slice(11, 16) + "–" + s.end_at.slice(11, 16) + "</div><div class='slot-title'>" + esc(s.title) +
-          "</div><div class='slot-meta'>" + esc(s.teacher || "—") + " · " + esc(s.room || "—") + "</div></div>").join("")
-      : emptyBox("📭", "今天暂无课程");
-
-    const pathBox = d.path.nodes.length
-      ? d.path.nodes.slice(0, 4).map((n) => nodeRow(n)).join("")
-      : emptyBox("🧭", "还没有人生路径，去共创一条吧");
-
-    const aiNote = buildAiNote(d);
+    const focusCard =
+      '<div class="card"><div class="card-head"><span class="card-title">专注</span><span class="tag accent">今日 ' + formatMin(minToday) + '</span></div>' +
+      '<div class="text-soft" style="font-size:13.5px;margin-bottom:12px">今天有 <b>' + focusWins.length + '</b> 个适合专注的时段。</div>' +
+      '<button class="btn block" id="startFocus">🎯 开始专注</button></div>';
 
     view.innerHTML =
-      '<div class="page-head"><div><div class="page-title">概览 Dashboard</div><div class="page-sub">把散落的信息，收束到一个入口 · ' + esc(t) + "</div></div></div>" +
-      h +
-      stats +
-      '<div class="grid grid-2 mt">' +
-        '<div class="card"><div class="card-head"><span class="card-title">今日课表</span><a class="btn ghost sm" href="#/schedule">查看全部</a></div>' + courseList + "</div>" +
-        '<div class="card"><div class="card-head"><span class="card-title">人生路径</span><a class="btn ghost sm" href="#/life-path">打开</a></div>' + pathBox + "</div>" +
-      "</div>" +
-      '<div class="card mt"><div class="card-head"><span class="card-title">AI 导师 · 今日提醒 <span class="tag accent">只建议 · 你来拍板</span></span></div>' + aiNote + "</div>";
+      '<div class="page-head"><div><div class="page-title">今日</div><div class="page-sub">' + esc(t) + " · 当日行动</div></div></div>" +
+      '<div class="grid grid-2" style="grid-template-columns:' + (goal ? "1fr 300px" : "1fr") + '">' +
+      '<div class="card"><div class="card-head"><span class="card-title">课表时间轴</span></div><div>' + timeline + "</div></div>" +
+      (goal ? goalHTML + focusCard : focusCard) +
+      "</div>";
 
-    bindDataGo();
+    const sf = $("#startFocus");
+    if (sf) sf.onclick = () => openFocus(45);
+    bindSlotActions();
   }
-
-  function statCard(label, value, unit, trend) {
-    return "<div class='card stat-card'><div class='stat-label'>" + label + '</div><div class="stat-value">' + value + ' <span style="font-size:15px;font-weight:600;color:var(--text-soft)">' + unit + "</span></div><div class='stat-trend " + (trend.startsWith("up") ? "up" : "") + "'>" + trend + "</div></div>";
+  function timelineSlotHTML(s) {
+    const color = s.color || "#4c5fe4";
+    const focus = s.kind === "focus";
+    return '<div class="timeline-slot"><div class="t-time">' + s.start_at.slice(11, 16) + "</div>" +
+      '<div class="t-line" style="background:' + color + '"></div>' +
+      '<div class="t-main"><div class="t-title">' + esc(s.title) + (focus ? ' <span class="tag warn">专注</span>' : "") + "</div>" +
+      '<div class="t-meta">' + esc(s.teacher || "—") + (s.room ? " · " + esc(s.room) : "") + "</div>" +
+      '<div style="margin-top:6px;display:flex;gap:8px">' +
+      '<button class="where-btn" data-qslot="' + s.id + '" data-title="' + esc(s.title) + '">🧑‍🏫 问导师</button>' +
+      (focus ? '<button class="where-btn" data-focus="' + s.id + '">开始专注</button>' : "") +
+      "</div></div></div>";
   }
-  function upClass(s) { return s; }
+  function bindSlotActions() {
+    document.querySelectorAll("[data-qslot]").forEach((b) => (b.onclick = () => askMentor("课程「" + b.dataset.title + "」", { kind: "slot", title: b.dataset.title })));
+    document.querySelectorAll("[data-focus]").forEach((b) => (b.onclick = () => openFocus(45)));
+  }
+  function todayGoal(d) {
+    const pool = d.path.nodes.filter((n) => n.status === "in_progress" && n.type === "short_term_goal");
+    if (pool.length) return pool[0];
+    const any = d.path.nodes.filter((n) => n.status === "in_progress");
+    return any.length ? any[0] : null;
+  }
+  function sumFocusMinutes(d, dateISO) {
+    return d.focusSessions.filter((f) => f.status === "completed" && f.started_at && f.started_at.slice(0, 10) === dateISO).reduce((a, f) => a + f.actual_duration_min, 0);
+  }
   function formatMin(min) {
     if (!min) return "0m";
     if (min < 60) return min + "m";
-    const hh = Math.floor(min / 60);
-    const mm = min % 60;
-    return hh + "h" + (mm ? pad(mm) + "m" : "");
-  }
-  function sumFocusToday(d, dateISO) {
-    return d.focusSessions.filter((f) => f.status === "completed" && f.started_at && f.started_at.slice(0, 10) === dateISO).reduce((a, f) => a + f.actual_duration_min, 0);
-  }
-  function nodeRow(n) {
-    const st = statusMeta(n.status);
-    return "<div style='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)'><span>" + st.done + "</span><div style='flex:1'><div style='font-weight:600;font-size:14px'>" + esc(n.title) + "</div><div class='text-soft' style='font-size:12px'>" + esc(n.description || typeLabel(n.type)) + "</div></div><span class='tag " + st.cls + "'>" + st.label + "</span></div>";
-  }
-  function buildAiNote(d) {
-    const ps = pathStats(d.path);
-    let tips = [];
-    if (ps.pending > 0) tips.push("你有 " + ps.pending + " 个「待定」节点。人生方向可以待定，这里不强求补全，等你想好了再看。");
-    const focusToday = sumFocusToday(d, todayISO());
-    if (focusToday < 60) tips.push("今天专注已达 " + focusToday + " 分钟，是否需要再安排一个番茄钟？");
-    const last = d.assessment[0];
-    if (last) tips.push("最近评价《" + esc(last.comment) + "》—— 已是对你的肯定。");
-    if (d.path.nodes.some((n) => n.type === "short_term_goal" && n.due_at && n.due_at < todayISO() && n.status !== "achieved"))
-      tips.push("有个短期目标到期了，可以回顾一下，或把它改成「待定」。");
-    const items = tips.slice(0, 3).map((t) => "<li>" + t + "</li>").join("");
-    return "<ul style='line-height:1.9;padding-left:18px'>" + (items || "<li>观察中，暂无特别提醒。</li>") + "</ul>" +
-      '<div class="ob-note" style="background:var(--primary-soft);color:var(--primary)">以上只是建议。你可以直接说“不”，也可以推翻、待定或修改自己的路径。</div>';
+    return Math.floor(min / 60) + "h" + (min % 60 ? pad(min % 60) + "m" : "");
   }
 
-  /* ============================================================
-   * 2. Schedule 日程课表
-   * ============================================================ */
-  function renderSchedule() {
+  /* ---------- 导师 ---------- */
+  function ensureMentorSeed() {
     const d = store.get();
-    const days = buildWeek(d, state.weekStart);
-    const weekLabel = state.weekStart.slice(5, 7) + "/" + state.weekStart.slice(8) + " – " + isoDay(new Date(new Date(state.weekStart).getTime() + 6 * 86400000)).slice(5);
-    const params = weekParityFor(state.weekStart) === "odd" ? "单周" : "双周";
-    const cols = days.map((day) => schedCol(day)).join("");
-    view.innerHTML =
-      '<div class="page-head"><div><div class="page-title">日程课表</div><div class="page-sub">统一课表 · ' + esc(params) + " · " + esc(weekLabel) + "</div></div>" +
-      '<div class="week-toolbar"><button class="btn ghost" id="prevWeek">← 上一周</button><button class="btn ghost" id="nextWeek">下一周 →</button><button class="btn ghost" id="todayWeek">回到本周</button></div></div>" +
-      '<div class="sched-grid">' + cols + "</div>" +
-      '<div class="mt text-faint" style="font-size:12.5px">💡 课表来自「云平台 / ManageBac / 手动」合并（Mock）。专注段会自动标出，用于「专注模式」。</div>';
-    $("#prevWeek").onclick = () => { state.weekStart = addDays(state.weekStart, -7); renderSchedule(); };
-    $("#nextWeek").onclick = () => { state.weekStart = addDays(state.weekStart, 7); renderSchedule(); };
-    $("#todayWeek").onclick = () => { state.weekStart = startOfWeek(todayISO()); renderSchedule(); };
-  }
-  function buildWeek(d, weekStart) {
-    const out = [];
-    for (let i = 0; i < 7; i++) {
-      const date = addDays(weekStart, i);
-      out.push({ date, slots: slotsForDate(date, d) });
+    if (!d.mentorMessages || !d.mentorMessages.length) {
+      d.mentorMessages = [{
+        role: "ai", id: uid(), text: "我是你的辅导与建议者。所有规划与调整，决定权永远在你。想聊什么？成绩、路径、今天的日程，或点下方快捷提问。",
+      }];
+      store.persist();
     }
-    return out;
+    return d.mentorMessages;
   }
-  function schedCol(day) {
-    const t = todayISO();
-    const isToday = day.date === t;
-    const slotsHTML = day.slots.length
-      ? day.slots.map((s) => slotCard(s)).join("")
-      : "<div class='empty' style='padding:20px 6px'><div style='font-size:20px'>🌸</div></div>";
-    const dowName = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][new Date(day.date + "T00:00:00").getDay()];
-    return "<div class='sched-col" + (isToday ? " today" : "") + "'><div class='sched-col-head'><span class='day-name'>" + dowName + "</span><span class='day-num'>" + day.date.slice(5).replace("-", "/") + (isToday ? " · 今" : "") + "</span></div>" + slotsHTML + "</div>";
-  }
-  function slotCard(s) {
-    const style = s.color ? "border-left-color:" + s.color : "";
-    return "<div class='slot-card " + s.kind + "' style='" + style + "'><div class='slot-time'>" + s.start_at.slice(11, 16) + "–" + s.end_at.slice(11, 16) + "</div><div class='slot-title'>" + esc(s.title) + "</div><div class='slot-meta'>" + esc(s.room || "—") + "</div></div>";
-  }
-
-  /* ============================================================
-   * 3. Focus 专注模式
-   * ============================================================ */
-  function renderFocus() {
-    const d = store.get();
-    const windows = slotsForDate(todayISO(), d).filter((s) => s.kind === "focus");
-    const t = todayISO();
-    const sessionsToday = d.focusSessions.filter((f) => f.started_at && f.started_at.slice(0, 10) === t);
-    const completed = sessionsToday.filter((f) => f.status === "completed");
-    const minutes = completed.reduce((a, f) => a + f.actual_duration_min, 0);
-
-    const autoWindows = windows.length
-      ? windows.map((w) => "<div class='slot-card focus'><div class='slot-time'>" + w.start_at.slice(11, 16) + "–" + w.end_at.slice(11, 16) + "</div><div class='slot-title'>🟢 " + esc(w.title) + "</div><div class='slot-meta'>建议专注时段</div></div>").join("")
-      : emptyBox("✨", "今天没有安排为专注时段的课程，可手动开始");
-
-    const sessionsHTML = d.focusSessions.length
-      ? d.focusSessions.slice(-6).reverse().map((f) => {
-          const st = f.status === "completed" ? "<span class='tag accent'>已完成</span>" : f.status === "running" ? "<span class='tag primary'>进行中</span>" : "<span class='tag warn'>中止</span>";
-          return "<div class='focus-list-item'><div><div style='font-weight:600'>" + (f.started_at ? f.started_at.slice(5, 16).replace("T", " ") : "—") + "</div><div class='text-faint' style='font-size:12px'>计划 " + f.planned_duration_min + " min</div></div><div style='text-align:right;display:flex;align-items:center;gap:10px'>" + (f.actual_duration_min ? "<b>" + f.actual_duration_min + "min</b>" : "") + st + "</div></div>";
-        }).join("")
-      : emptyBox("🎯", "还没有专注记录");
-
-    view.innerHTML =
-      '<div class="page-head"><div><div class="page-title">专注模式</div><div class="page-sub">基于课表的专注时段 · 屏蔽干扰，也尊重你的界限</div></div></div>' +
-      '<div class="grid grid-2">' +
-        '<div class="card focus-timer-wrap">' + focusRing() + '<div class="focus-status" id="focusStatus">' + focusStatusText() + "</div><div class='focus-actions' id='focusActions'>" + focusActionsHTML() + "</div></div>" +
-        '<div class="card"><div class="card-head"><span class="card-title">今天建议的专注时段</span><span class="tag accent">已专注 " + formatMin(minutes) + "</span></div>" + autoWindows + "</div>" +
-      "</div>" +
-      '<div class="card mt"><div class="card-head"><span class="card-title">专注记录</span></div>' + sessionsHTML + "</div>";
-
-    bindFocus();
-  }
-  function focusRing() {
-    const total = state.focus.total || 45;
-    const remain = state.focus.session ? state.focus.remaining : total;
-    const pct = state.focus.session ? (remain / total) * 100 : 100;
-    const C = 2 * Math.PI * 88;
-    const off = C * (1 - pct / 100);
-    return '<div class="focus-ring"><svg width="200" height="200"><circle class="ring-bg" cx="100" cy="100" r="88" fill="none" stroke-width="12"/><circle class="ring-fg" cx="100" cy="100" r="88" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + off + '"/></svg><div class="focus-time"><b>' + fmtClock(state.focus.session ? state.focus.remaining : total) + '</b><span>' + (state.focus.session ? "剩余" : "所选时长") + "</span></div></div>";
-  }
-  function fmtClock(min) {
-    const m = Math.floor(min / 60);
-    const s = min % 60;
-    return pad(m) + ":" + pad(s);
-  }
-  function focusStatusText() {
-    if (state.focus.session) return state.focus.session.status === "running" ? "专注进行中 · " + state.focus.session.title : "已暂停";
-    return "准备开始一段专注（默认 45 分钟）";
-  }
-  function focusActionsHTML() {
-    if (state.focus.session) {
-      return state.focus.session.status === "running"
-        ? "<button class='btn ghost' id='pauseFocus'>⏸ 暂停</button><button class='btn danger' id='stopFocus'>■ 结束</button>"
-        : "<button class='btn accent' id='resumeFocus'>▶ 继续</button><button class='btn danger' id='stopFocus'>■ 结束</button>";
-    }
-    return '<button class="btn accent" data-min="25">25 分钟</button><button class="btn accent" data-min="45">45 分钟</button><button class="btn accent" data-min="60">60 分钟</button>';
-  }
-  function bindFocus() {
-    const actions = $("#focusActions");
-    if (!actions) return;
-    actions.querySelectorAll("button[data-min]").forEach((b) => {
-      b.onclick = () => startFocus(parseInt(b.dataset.min, 10));
-    });
-    const pause = $("#pauseFocus"); if (pause) pause.onclick = pauseFocus;
-    const resume = $("#resumeFocus"); if (resume) resume.onclick = resumeFocus;
-    const stop = $("#stopFocus"); if (stop) stop.onclick = stopFocus;
-  }
-  function startFocus(min) {
-    const d = store.get();
-    const session = { id: uid(), user_id: d.user.id, slot_id: null, started_at: now(), ended_at: null, planned_duration_min: min, actual_duration_min: 0, status: "running", title: "手动专注" };
-    d.focusSessions.push(session);
-    store.persist();
-    state.focus.session = session;
-    state.focus.total = min * 60;
-    state.focus.remaining = min * 60;
-    renderFocus();
-    toast("专注开始，加油！", "ok");
-  }
-  function tick() {
-    if (!state.focus.session || state.focus.session.status !== "running") return;
-    state.focus.remaining -= 1;
-    if (state.focus.remaining <= 0) { stopFocus(true); return; }
-    refreshFocusUI();
-  }
-  /* refreshFocusUI updates in place to avoid resetting timer */
-  function refreshFocusUI() {
-    const timeEl = $(".focus-ring .focus-time b");
-    const ringFg = $(".focus-ring .ring-fg");
-    const status = $("#focusStatus");
-    if (timeEl) timeEl.textContent = fmtClock(state.focus.remaining);
-    if (ringFg) {
-      const total = state.focus.total || 1;
-      const C = 2 * Math.PI * 88;
-      ringFg.setAttribute("stroke-dashoffset", C * (1 - state.focus.remaining / total));
-    }
-    if (status) status.textContent = focusStatusText();
-  }
-  function pauseFocus() {
-    if (state.focus.session) {
-      state.focus.session.status = "paused";
-      toast("已暂停，稍后继续");
-      renderFocus();
-    }
-  }
-  function resumeFocus() {
-    if (state.focus.session) {
-      state.focus.session.status = "running";
-      renderFocus();
-    }
-  }
-  function stopFocus(complete) {
-    if (!state.focus.session) return;
-    const d = store.get();
-    const s = state.focus.session;
-    const elapsed = (complete ? state.focus.total : state.focus.total - state.focus.remaining) / 60;
-    s.ended_at = now();
-    s.actual_duration_min = Math.round(elapsed);
-    s.status = complete ? "completed" : "aborted";
-    const found = d.focusSessions.find((f) => f.id === s.id);
-    if (found) { found.ended_at = s.ended_at; found.actual_duration_min = s.actual_duration_min; found.status = s.status; }
-    store.persist();
-    if (state.focus.timerId) { clearInterval(state.focus.timerId); state.focus.timerId = null; }
-    state.focus.session = null;
-    renderFocus();
-    toast(complete ? "专注完成，恭喜！🎉" : "已中止本次专注", complete ? "ok" : "warn");
-  }
-  /* keep timer running across re-renders */
-  function ensureTimer() {
-    if (state.focus.timerId) return;
-    state.focus.timerId = setInterval(tick, 1000);
-  }
-
-  /* ============================================================
-   * 4. Mentor AI 辅导
-   *   AI 返回建议 + reason + open_questions；decision_required 恒不为“由AI决定”。
-   * ============================================================ */
   function renderMentor() {
     const d = store.get();
-    const msgs = state.mentor.messages;
-    if (!msgs.length) {
-      msgs.push({ role: "ai", text: "你好，我是你的校园 AI 导师。我只做分析与建议，<b>决定权永远在你</b>。想从哪方面聊聊？比如：期末考试规划、学习方法、进程评价、或者你的人生路径。" });
-    }
-    const msgHTML = msgs.map((m) => mentorMsgHTML(m)).join("");
+    const msgs = ensureMentorSeed();
+    const chat = msgs.map((m) => msgHTML(m)).join("");
+    const shortcuts = (d.promptShortcuts || []).map((p) => '<button class="chip" data-shot="' + p.id + '">' + esc(p.label) + "</button>").join("");
     view.innerHTML =
-      '<div class="page-head"><div><div class="page-title">AI 辅导 <span class="tag accent">导师不决策</span></div><div class="page-sub">上下文以你的「人生路径」为主轴 · 数据已脱敏</div></div></div>' +
-      '<div class="card"><div class="chat-box" id="chatBox">' + msgHTML + '</div><div class="chat-input" id="chatInputRow">' +
-      '<input id="mentorInput" placeholder="说说你的想法 / 问一个问题…" />' +
-      '<button class="btn" id="mentorSend">发送</button></div></div>' +
-      '<div class="mt text-faint" style="font-size:12.5px">ⓘ AI 返回的建议永不改变你的路径状态；采纳/拒绝由你决定，并会记录。</div>';
+      '<div class="page-head"><div><div class="page-title">导师</div><div class="page-sub">受邀导师 · 对话流 + 建议</div></div></div>' +
+      '<div class="mentor-banner">我是你的<b>辅导与建议者</b>，所有规划与调整的<b>决定权永远在你</b>。我提供的每条建议都注明依据。</div>' +
+      '<div class="card"><div class="chat-box" id="chatBox">' + chat + "</div>" +
+      '<div class="chat-input"><div style="display:flex;gap:8px;align-items:center">' +
+      '<input id="mentorInput" placeholder="问问你的导师…" />' +
+      '<button class="btn mentor" id="mentorSend">发送</button></div></div>' +
+      '<div class="prompt-shortcuts">' + shortcuts + "</div></div>";
     bindMentor();
     const box = $("#chatBox"); box.scrollTop = box.scrollHeight;
   }
-  function mentorMsgHTML(m) {
-    if (m.role === "user") return '<div class="chat-msg user"><div class="chat-bubble">' + m.text + "</div></div>";
+  function msgHTML(m) {
+    if (m.role === "user") return '<div class="chat-msg user"><div class="avatar user">我</div><div class="chat-bubble">' + m.text + "</div></div>";
     let extra = "";
-    if (m.reason) extra = '<div class="reason"><div class="why">【为什么这么建议】</div>' + m.reason + "</div>";
-    if (m.suggestions) {
-      extra += m.suggestions.map((s) =>
-        '<div class="suggest-box"><div class="suggest-text">💡 ' + s.text + '</div>' +
-        (s.reason ? '<div class="suggest-reason">' + s.reason + "</div>" : "") +
-        '<div class="suggest-actions"><button class="btn sm violet" data-accept="' + s.id + '">采纳（转为我的节点）</button><button class="btn sm ghost" data-reject="' + s.id + '">这不是我想要的</button></div></div>'
-      ).join("");
-    }
-    if (m.openQuestions && m.openQuestions.length) extra += '<div class="ob-note" style="margin-top:10px"><b>给我的问题：</b> ' + m.openQuestions.map(esc).join("；") + "</div>";
-    return '<div class="chat-msg"><div class="avatar">AI</div><div class="chat-bubble">' + m.text + extra + "</div></div>";
+    if (m.reason) extra += '<div class="why"><div class="why-label">💡 为什么这么建议</div>' + m.reason + "</div>";
+    if (m.suggestions && m.suggestions.length) extra += m.suggestions.map((s) => sugCardHTML(s)).join("");
+    if (m.openQuestions && m.openQuestions.length) extra += '<div class="ob-note"><b>给我的问题：</b> ' + m.openQuestions.map(esc).join("；") + "</div>";
+    return '<div class="chat-msg"><div class="avatar mentor">导</div><div class="chat-bubble">' + m.text + "<div>" + extra + "</div></div></div>";
+  }
+  function sugCardHTML(s) {
+    let state = "";
+    if (s.status === "pending") state = '<span class="tag warn">暂缓</span>';
+    else if (s.status === "declined") state = '<span class="tag muted">不采纳</span>';
+    else if (s.status === "accepted") state = '<span class="tag accent">已采纳</span>';
+    return '<div class="suggest-card" id="sug-' + s.id + '"><div class="s-text">💡 ' + esc(s.text) + "</div>" +
+      (s.reason ? '<div class="s-reason">' + esc(s.reason) + "</div>" : "") +
+      '<div class="suggest-actions">' +
+      '<button class="btn sm" data-accept="' + s.id + '">采纳并去编辑器落地</button>' +
+      '<button class="btn sm ghost" data-defer="' + s.id + '">暂缓</button>' +
+      '<button class="btn sm ghost" data-decline="' + s.id + '">不采纳</button>' + state + "</div></div>";
   }
   function bindMentor() {
     const send = $("#mentorSend"), input = $("#mentorInput");
-    send.onclick = () => { const v = input.value.trim(); if (v) { sendMentor(v); input.value = ""; } };
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const v = input.value.trim(); if (v) { sendMentor(v); input.value = ""; } } });
+    if (send && input) {
+      send.onclick = () => { const v = input.value.trim(); if (v) { sendMentor(v); input.value = ""; } };
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const v = input.value.trim(); if (v) { sendMentor(v); input.value = ""; } } });
+      if (S.activeContextTag) { input.placeholder = "结合「" + S.activeContextTag + "」，继续问…"; }
+    }
+    document.querySelectorAll("[data-shot]").forEach((b) => (b.onclick = () => sendShortcut(b.dataset.shot)));
     document.querySelectorAll("[data-accept]").forEach((b) => (b.onclick = () => acceptSuggestion(b.dataset.accept)));
-    document.querySelectorAll("[data-reject]").forEach((b) => (b.onclick = () => rejectSuggestion(b.dataset.reject)));
+    document.querySelectorAll("[data-defer]").forEach((b) => (b.onclick = () => deferSuggestion(b.dataset.defer)));
+    document.querySelectorAll("[data-decline]").forEach((b) => (b.onclick = () => declineSuggestion(b.dataset.decline)));
   }
-  function mentorAppend(m) {
-    state.mentor.messages.push(m);
+  function appendMessage(m) {
+    const d = store.get();
+    d.mentorMessages.push(m);
+    store.persist();
     const box = $("#chatBox");
-    if (box) { box.insertAdjacentHTML("beforeend", mentorMsgHTML(m)); box.scrollTop = box.scrollHeight; bindMentor(); }
+    if (box) { box.insertAdjacentHTML("beforeend", msgHTML(m)); box.scrollTop = box.scrollHeight; bindMentor(); }
+  }
+  function showTyping() {
+    const box = $("#chatBox");
+    if (!box) return;
+    box.insertAdjacentHTML("beforeend", '<div class="chat-msg" id="typingRow"><div class="avatar mentor">导</div><div class="chat-bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div></div>');
+    box.scrollTop = box.scrollHeight;
+  }
+  function hideTyping() {
+    const r = $("#typingRow");
+    if (r) r.remove();
   }
   function sendMentor(text) {
-    mentorAppend({ role: "user", text: esc(text) });
-    // typing indicator
-    const box = $("#chatBox");
-    box.insertAdjacentHTML("beforeend", '<div class="chat-msg"><div class="avatar">AI</div><div class="chat-bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div></div>');
-    box.scrollTop = box.scrollHeight;
+    appendMessage({ role: "user", id: uid(), text: esc(text) });
+    showTyping();
+    const ctx = S.activeContextTag;
     setTimeout(() => {
-      box.querySelector(".typing-dots") && box.querySelector(".typing-dots").closest(".chat-msg").remove();
-      const reply = aiReply(text);
-      mentorAppend({ role: "ai", text: reply.text, reason: reply.reason, suggestions: reply.suggestions, openQuestions: reply.openQuestions });
-    }, 900);
+      hideTyping();
+      appendMessage(buildAiReply(text, ctx));
+    }, 850);
   }
-  function aiReply(text) {
+  function sendShortcut(id) {
+    const map = {
+      plan: "请基于我的人生路径，帮我规划本周的小任务。",
+      grade: "帮我分析我的成绩趋势，并给点针对性建议。",
+      mentor: "我该往哪个升学方向走？",
+      focus: "我今天如何更好地安排专注时间？",
+    };
+    sendMentor(map[id] || "请给我建议。");
+  }
+  function buildAiReply(text, ctx) {
     const d = store.get();
-    const asData = midScore(d);
-    const t = text.toLowerCase();
-    if (/成绩|考试|分数|月考/.test(t)) {
-      return {
-        text: "你在近三次考试中的平均分约在 <b>" + midScore(d).avg + "</b>，波动不大。可以定期回顾错题的分布。",
-        reason: "我依据你的成绩记录（data-model 的 Grade[]）做了均值分析，仅供你参考。",
-        openQuestions: ["最近哪一科让你最没把握？"],
-      };
+    const t = text + (ctx || "");
+    if (/成绩|分数|趋势/.test(t)) {
+      const avg = gradeAvg(d.grades);
+      return { role: "ai", id: uid(), text: "近 " + d.grades.length + " 次考试平均约 <b>" + avg + "</b> 分，整体稳定。可以留意错题分布，复盘时抓失分最集中的点。", reason: "依据你的 Grade[]（已脱敏）做均值与趋势判断。", openQuestions: ["最近哪一科最让你没把握？"] };
     }
-    if (/高考|大学|升学|留学|出国/.test(t)) {
-      return {
-        text: "升学方向可以慢慢探索。你目前的人生路径里有一个「走读：出国留学」节点，标为<b>待定</b>——这完全没问题。",
-        reason: "我从你的人生路径里读到该节点，暂不作倾向性判断。",
-        openQuestions: ["要不要先把「待定」换成一个具体的探索小任务？"],
-      };
+    if (/升学|高校|大学|留学|出国|方向/.test(t)) {
+      return { role: "ai", id: uid(), text: "升学方向值得慢慢探索。你路径里有一个「待定」节点——完全没问题，先把信息面铺开，再做决定。", reason: "读取自你的 LifePath[]，暂不作倾向性判断。", suggestions: [{ id: uid(), text: "本周加入「探索大学与专业」的小任务", reason: "把大方向拆成可执行小任务，方便你逐步明确，也可能随时待定。", status: null }], openQuestions: ["要不要先了解 3 个不同的专业方向？"] };
     }
-    if (/专注|效率|分心|自习/.test(t)) {
-      return {
-        text: "今天的课表里有若干专注时段（社团/晚自习已标为 focus）。建议挑一个开启专注模式，先从 25 分钟开始。",
-        reason: "基于 ScheduleSlot[kind=focus] 与你的专注历史（今天约 " + sumFocusToday(d, todayISO()) + " 分钟）。",
-        openQuestions: ["现在就开始一段 25 分钟的专注吗？"],
-      };
+    if (/专注|效率|分心|时间/.test(t)) {
+      return { role: "ai", id: uid(), text: "今天课表里有适合专注的时段。可以先从 25 分钟开始，结束时记录一条专注会话。", reason: "依据 ScheduleSlot[kind=focus] 与你今日 " + formatMin(sumFocusMinutes(d, todayISO())) + " 分钟专注。", openQuestions: ["现在就开启一段 25 分钟的专注吗？"] };
     }
-    // default: general mentor reply with a suggestion based on path
-    const sug = {
-      id: uid(),
-      text: "可以考虑给「" + (d.path.nodes[1] ? d.path.nodes[1].title : "你的短期目标") + "」安排一个本周的具体小任务。",
-      reason: "把长期目标拆成可执行的任务，更容易落地；你可以接受，也可以说“不”。",
-    };
-    return {
-      text: "收到。我围绕你的<b>人生路径</b>给出一条参考建议。你可以采纳为节点，也可以直接拒绝，我尊重你的选择。",
-      reason: "上下文取自你的 LifePathNode[]（已脱敏）。这只是建议稿，需你确认后才落地。",
-      suggestions: [sug],
-      openQuestions: ["你想优先推进哪一个目标？"],
-    };
-  }
-  function midScore(d) {
-    const gs = d.grades;
-    if (!gs.length) return { avg: "--" };
-    return { avg: (gs.reduce((a, g) => a + (g.score || 0), 0) / gs.length).toFixed(0) };
+    return { role: "ai", id: uid(), text: "围绕你的<b>人生路径</b>，我给出如下参考建议。你是否采纳，由你决定；不接受也没关系，我会如实记录。", reason: "上下文取自你的 LifePath[]（已脱敏），仅供你判断。", suggestions: [{ id: uid(), text: "把「" + (d.path.nodes[1] ? d.path.nodes[1].title : "近期目标") + "」细化出一个本周小任务", reason: "把长期目标拆成步骤，更容易落地。", status: null }], openQuestions: ["你更想优先推进哪个目标？"] };
   }
   function acceptSuggestion(id) {
     const d = store.get();
-    // find the latest ai suggestion by id in messages
-    let found = null;
-    for (const m of state.mentor.messages) {
-      if (m.suggestions) { const s = m.suggestions.find((x) => x.id === id); if (s) { found = s; break; } }
-    }
-    if (!found) return;
-    const node = makePathNode({ type: "short_term_goal", title: found.text.slice(0, 30).replace(/^💡\s*/, ""), description: found.text, status: "in_progress", source: "user", ai_note: found.reason || "" });
-    d.path.nodes.push(node);
+    const sug = findSuggestion(id);
+    if (!sug) return;
+    sug.status = "accepted";
     store.persist();
-    removeSuggestBox(id);
-    managerToast("已采纳，写入你的「人生路径」✅", "ok");
+    S.draftFromSuggestion = sug;
+    setTab(0);
+    openNodeEditorFromSuggestion(sug);
+    persistToast("已采纳，去「我」的编辑器确认落地", true);
   }
-  function rejectSuggestion(id) {
-    removeSuggestBox(id);
-    managerToast("好的，这条建议已被驳回。你随时可以推翻它。", "warn");
-    // record the decision
+  function deferSuggestion(id) {
+    const s = findSuggestion(id); if (!s) return; s.status = "pending";
+    store.persist(); updateSugCard(id); persistToast("好的，先暂缓这条建议。", false);
+  }
+  function declineSuggestion(id) {
+    const s = findSuggestion(id); if (!s) return; s.status = "declined";
+    store.persist(); updateSugCard(id); persistToast("已记录「不采纳」，未改动任何路径。", false);
+  }
+  function findSuggestion(id) {
     const d = store.get();
-    d.mentorHistory = d.mentorHistory || [];
-    d.mentorHistory.push({ id: uid(), decision: "rejected", suggestion_id: id, at: now() });
-    store.persist();
+    for (const m of d.mentorMessages || []) if (m.suggestions) { const s = m.suggestions.find((x) => x.id === id); if (s) return s; }
+    return null;
   }
-  function removeSuggestBox(id) {
-    const box = document.querySelector('[data-accept="' + id + '"]');
-    if (box) box.closest(".suggest-box").remove();
-  }
-  function managerToast(m, t) { toast(m, t); }
-
-  function makePathNode(o) {
-    const base = { id: uid(), parent_id: null, description: "", start_at: null, due_at: null, completed_at: null, ai_note: null, order: 999, source: "user" };
-    return Object.assign(base, o);
-  }
-
-  /* ============================================================
-   * 5. Life Path 人生路径
-   * ============================================================ */
-  function renderLifePath() {
+  function updateSugCard(id) {
     const d = store.get();
-    const p = d.path;
-    const ps = pathStats(p);
-    const nodesHTML = p.nodes.length
-      ? p.nodes.sort((a, b) => (a.order || 0) - (b.order || 0)).map((n) => pathNodeHTML(n)).join("")
-      : emptyBox("🧭", "还没有节点，去 Onboarding 共创一条吧");
-    view.innerHTML =
-      '<div class="page-head"><div><div class="page-title">人生路径</div><div class="page-sub">可折叠、可变化 · 决策权永远在你</div></div>' +
-      '<button class="btn" id="addNodeBtn">+ 添加节点</button></div>' +
-      '<div class="card"><div class="path-title-row"><span class="brand-mark">PATH</span><b style="font-size:17px">' + esc(p.title) + '</b>' +
-      '<span class="tag">进行中 ' + ps.inProgress + '</span><span class="tag accent">已达成 ' + ps.achieved + '</span><span class="tag warn">待定 ' + ps.pending + "</span></div>" +
-      '<div class="timeline">' + nodesHTML + "</div></div>" +
-      '<div class="ob-note">🫵 这是你的路径。任何节点都可以改为「待定」、暂停或推翻 —— 人生充满未知，AI 只是帮你梳理。</div>';
-    const add = $("#addNodeBtn"); if (add) add.onclick = openAddNodeModal;
-    bindPathNodeActions();
+    const el = $("#sug-" + id);
+    const s = findSuggestion(id);
+    if (el && s) { el.outerHTML = sugCardHTML(s); bindMentor(); }
   }
-  function pathNodeHTML(n) {
-    const st = statusMeta(n.status);
-    const typeTag = typeLabel(n.type);
-    return '<div class="node-item ' + n.status + '"><div class="node-card">' +
-      '<div class="node-type">' + esc(typeTag) + (n.source === "ai_suggest" ? ' <span class="tag violet">AI 建议稿</span>' : "") + "</div>" +
-      '<div class="node-title">' + esc(n.title) + "</div>" +
-      (n.description ? '<div class="node-desc">' + esc(n.description) + "</div>" : "") +
-      (n.ai_note ? '<div class="node-foot"><span class="note">AI：' + esc(n.ai_note) + "</span></div>" : "") +
-      '<div class="node-foot"><span class="tag ' + st.cls + '">' + st.label + "</span>" +
-      (n.due_at ? '<span class="text-faint" style="font-size:11.5px">截止 ' + esc(n.due_at) + "</span>" : "") +
-      '<span style="margin-left:auto;display:flex;gap:6px">' +
-      statusBtn(n.id, "achieved", "✓ 达成") + statusBtn(n.id, "pending", "待定") + statusBtn(n.id, "abandoned", "放弃") +
-      '<button class="btn sm ghost" data-del="' + n.id + '">删除</button></span></div></div></div>';
-  }
-  function statusBtn(id, statusTo, label) {
-    const st = statusMeta(statusTo);
-    return '<button class="btn sm ghost" data-status="' + statusTo + '" data-id="' + id + '" style="color:' + (statusTo === "achieved" ? "var(--accent)" : statusTo === "pending" ? "var(--warn)" : "var(--danger)") + '">' + label + "</button>";
-  }
-  function bindPathNodeActions() {
-    document.querySelectorAll("[data-status]").forEach((b) => (b.onclick = () => setNodeStatus(b.dataset.id, b.dataset.status)));
-    document.querySelectorAll("[data-del]").forEach((b) => (b.onclick = () => delNode(b.dataset.del)));
-  }
-  function setNodeStatus(id, statusTo) {
+  function askMentor(contextLabel, ctxObj) {
+    S.activeContextTag = contextLabel;
     const d = store.get();
-    const n = d.path.nodes.find((x) => x.id === id);
-    if (!n) return;
-    n.status = statusTo; // 永远由用户操作
-    if (statusTo === "achieved") n.completed_at = now();
-    n.updated_at = now();
-    store.persist();
-    managerToast("节点状态已更新（由你决定）", "ok");
-    renderLifePath();
-  }
-  function delNode(id) {
-    const d = store.get();
-    d.path.nodes = d.path.nodes.filter((x) => x.id !== id);
-    store.persist();
-    managerToast("已删除节点", "warn");
-    renderLifePath();
-  }
-  function openAddNodeModal() {
-    const types = ['<option value="vision">愿景 vision</option><option value="long_term_goal">长期目标</option><option value="short_term_goal">短期目标</option><option value="task">任务</option><option value="interest">兴趣板块</option><option value="note">备注</option>'];
-    const html = '<div class="onboarding-overlay"><div class="onboarding-wrap"><div class="ob-title">+ 添加节点</div>' +
-      '<div class="ob-block"><div class="field"><label>类型</label><select id="ndType">' + types.join("") + "</select></div>" +
-      '<div class="field"><label>标题</label><input id="ndTitle" placeholder="例如：期末数学提高" /></div>' +
-      '<div class="field"><label>描述（可选）</label><textarea id="ndDesc" rows="2"></textarea></div>' +
-      '<div class="field"><label>截止日期（可选）</label><input id="ndDue" type="date" /></div>' +
-      '<div class="ob-actions"><div><button class="btn ghost" id="ndCancel">取消</button></div><button class="btn" id="ndSave">保存</button></div></div></div></div>';
-    const overlay = document.createElement("div");
-    overlay.innerHTML = html;
-    document.body.appendChild(overlay);
-    const wrap = overlay.firstElementChild;
-    $("#ndCancel", wrap).onclick = () => overlay.remove();
-    $("#ndSave", wrap).onclick = () => {
-      const title = $("#ndTitle", wrap).value.trim();
-      if (!title) return err("标题不能为空");
-      const d = store.get();
-      d.path.nodes.push(makePathNode({ type: $("#ndType", wrap).value, title, description: $("#ndDesc", wrap).value.trim(), due_at: $("#ndDue", wrap).value || null, status: "in_progress" }));
-      store.persist();
-      overlay.remove();
-      managerToast("已添加节点", "ok");
-      renderLifePath();
-    };
+    d.mentorMessages = d.mentorMessages || [];
+    ensureMentorSeed();
+    setTab(2);
+    const text = "请帮我看看「" + contextLabel + "」，给点建议。";
+    appendMessage({ role: "user", id: uid(), text: esc(text) });
+    showTyping();
+    setTimeout(() => { hideTyping(); appendMessage(buildAiReply(text, contextLabel)); }, 850);
   }
 
-  /* ============================================================
-   * 6. Onboarding 共创向导
-   * ============================================================ */
-  let ob = { step: 0, interests: [], thought: "", draft: [] };
-  const OB_STEPS = 4;
-  function renderOnboarding() {
-    openOnboarding();
-  }
-  function openOnboarding() {
-    const overlay = $("#onboardingOverlay");
+  /* ---------- Node editor (user-owned write) ---------- */
+  function openNodeEditor(node) {
+    S.editingNode = node;
+    S.draftFromSuggestion = null;
+    const overlay = $("#nodeEditorOverlay");
     overlay.classList.remove("hidden");
-    ob = { step: 0, interests: store.get().user.interests.slice(), thought: "", draft: draftFromPath(store.get().path) };
-    overlay.innerHTML = obShell();
+    const types = ['<option value="vision">愿景</option><option value="long_term_goal">长期目标</option><option value="short_term_goal">短期目标</option><option value="task">任务</option><option value="interest">兴趣板块</option><option value="note">备注</option>'];
+    const statuses = '<option value="in_progress">进行中</option><option value="achieved">已达成</option><option value="pending">待定</option><option value="abandoned">已放弃</option>';
+    const t = node || { type: "short_term_goal", title: "", description: "", status: "in_progress", due_at: "" };
+    overlay.innerHTML = '<div class="overlay-wrap"><div class="ob-title">' + (node ? "编辑节点" : "添加节点") + "</div>" +
+      (S.draftFromSuggestion ? '<div class="ob-desc" style="background:var(--pending-soft);padding:10px 12px;border-radius:10px">此内容来自导师建议（AI 依据 + 标题已预填）。<b>由你在这里亲手确认并保存</b>，才会落地到路径。</div>' : '<div class="ob-desc">写操作只由你发起。状态四态平等，任何位置都可标「待定」。</div>') +
+      '<div class="edit-grid"><div class="field"><label>类型</label><select id="edType">' + types.join("") + "</select></div>" +
+      '<div class="field"><label>状态</label><select id="edStatus">' + statuses + "</select></div></div>" +
+      '<div class="field"><label>标题</label><input id="edTitle" value="' + esc(t.title) + '" placeholder="例如：期末数学提高" /></div>' +
+      '<div class="field"><label>描述（可选）</label><textarea id="edDesc" rows="2">' + esc(t.description || "") + "</textarea></div>" +
+      '<div class="field"><label>截止日期（可选）</label><input id="edDue" type="date" value="' + esc(t.due_at || "") + '" /></div>' +
+      '<div class="ob-actions"><div></div><div style="display:flex;gap:10px"><button class="btn ghost" id="edCancel">取消</button><button class="btn" id="edSave">保存到我的路径</button></div></div></div>';
+    $("#edType", overlay).value = t.type || "short_term_goal";
+    $("#edStatus", overlay).value = t.status || "in_progress";
+    $("#edCancel", overlay).onclick = () => { S.editingNode = null; S.draftFromSuggestion = null; overlay.classList.add("hidden"); };
+    $("#edSave", overlay).onclick = saveNodeEditor;
+  }
+  function openNodeEditorFromSuggestion(sug) {
+    const overlay = $("#nodeEditorOverlay");
+    overlay.classList.remove("hidden");
+    const types = '<option value="short_term_goal">短期目标</option><option value="long_term_goal">长期目标</option><option value="task">任务</option>';
+    const statuses = '<option value="in_progress">进行中</option><option value="achieved">已达成</option><option value="pending">待定</option><option value="abandoned">已放弃</option>';
+    overlay.innerHTML = '<div class="overlay-wrap"><div class="ob-title">落地导师建议</div>' +
+      '<div class="ob-desc" style="background:var(--pending-soft);padding:10px 12px;border-radius:10px">以下已按建议预填（含 AI 依据）。这是<b>你的专属编辑器</b>——确认后点击《保存》，才会写入你的人生路径。</div>' +
+      '<div class="edit-grid"><div class="field"><label>类型</label><select id="edType">' + types + '</select></div>' +
+      '<div class="field"><label>状态</label><select id="edStatus">' + statuses + "</select></div></div>" +
+      '<div class="field"><label>标题</label><input id="edTitle" value="' + esc(sug.text.slice(0, 40).replace(/^💡\s*/, "")) + '" /></div>' +
+      '<div class="field"><label>描述（AI 依据，供你参考 / 可改）</label><textarea id="edDesc" rows="2">' + esc(sug.reason || "") + "</textarea></div>" +
+      '<div class="field"><label>截止日期（可选）</label><input id="edDue" type="date" /></div>' +
+      '<div class="ob-actions"><div></div><div style="display:flex;gap:10px"><button class="btn ghost" id="edCancel">取消 · 不落地</button><button class="btn" id="edSave">保存到我的路径</button></div></div></div>';
+    $("#edCancel", overlay).onclick = () => { S.editingNode = null; S.draftFromSuggestion = null; overlay.classList.add("hidden"); };
+    $("#edSave", overlay).onclick = saveNodeEditor;
+  }
+  function saveNodeEditor() {
+    const d = store.get();
+    const title = $("#edTitle").value.trim();
+    if (!title) { toast("标题不能为空", "danger"); return; }
+    const fields = { type: $("#edType").value, status: $("#edStatus").value, title, description: $("#edDesc").value.trim(), due_at: $("#edDue").value || null };
+    if (S.draftFromSuggestion) {
+      d.path.nodes.push(Object.assign({ id: uid(), parent_id: null, completed_at: fields.status === "achieved" ? now() : null, ai_note: S.draftFromSuggestion.reason || null, order: d.path.nodes.length }, fields));
+      S.draftFromSuggestion = null;
+    } else if (S.editingNode) {
+      Object.assign(S.editingNode, fields, { updated_at: now(), completed_at: fields.status === "achieved" ? (S.editingNode.completed_at || now()) : null });
+    } else {
+      d.path.nodes.push(Object.assign({ id: uid(), parent_id: null, completed_at: fields.status === "achieved" ? now() : null, ai_note: null, order: d.path.nodes.length }, fields));
+    }
+    store.persist();
+    $("#nodeEditorOverlay").classList.add("hidden");
+    S.editingNode = null;
+    persistToast("已保存到你的路径 ✅", true);
+    S.seg = "path";
+    setTab(0);
+  }
+
+  /* ---------- Focus modal ---------- */
+  function openFocus(min) {
+    S.focus = { running: true, remaining: min * 60, total: min * 60, timerId: null };
+    const overlay = $("#focusOverlay");
+    overlay.classList.remove("hidden");
+    renderFocusModal();
+    S.focus.timerId = setInterval(focusTick, 1000);
+  }
+  function renderFocusModal() {
+    const total = S.focus.total || 45 * 60;
+    const remain = S.focus.running ? S.focus.remaining : total;
+    const C = 2 * Math.PI * 92;
+    const off = C * (1 - remain / total);
+    const running = S.focus.running;
+    document.getElementById("focusOverlay").innerHTML =
+      '<div class="focus-full"><div style="font-size:18px;font-weight:700">🎯 专注模式</div>' +
+      '<div class="focus-ring"><svg width="220" height="220"><circle class="ring-bg" cx="110" cy="110" r="92" fill="none" stroke-width="12"/><circle class="ring-fg" cx="110" cy="110" r="92" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + off + '"/></svg><div class="focus-time"><b>' + fmtClock(remain) + '</b><span>' + (S.focus.running ? "专注中" : "暂停") + "</span></div></div>" +
+      '<div class="focus-status">' + (running ? "保持专注，屏蔽干扰。" : "已暂停，随时继续。") + "</div>" +
+      '<div class="focus-actions">' + (running
+        ? '<button class="btn ghost" id="focusPause">⏸ 暂停</button>'
+        : '<button class="btn accent" id="focusResume" style="background:var(--achieved)">▶ 继续</button>') +
+      '<button class="btn ghost" id="focusEnd">■ 结束</button></div></div>';
+    const p = $("#focusPause"); if (p) p.onclick = () => { S.focus.running = false; renderFocusModal(); };
+    const r = $("#focusResume"); if (r) r.onclick = () => { S.focus.running = true; renderFocusModal(); };
+    const e = $("#focusEnd"); if (e) e.onclick = () => endFocus(false);
+  }
+  function focusTick() {
+    if (!S.focus.running) return;
+    S.focus.remaining -= 1;
+    if (S.focus.remaining <= 0) { endFocus(true); return; }
+    const total = S.focus.total || 1;
+    const C = 2 * Math.PI * 92;
+    const tEl = $(".focus-ring .focus-time b");
+    const fg = $(".focus-ring .ring-fg");
+    if (tEl) tEl.textContent = fmtClock(S.focus.remaining);
+    if (fg) fg.setAttribute("stroke-dashoffset", C * (1 - S.focus.remaining / total));
+  }
+  function fmtClock(min) { return pad(Math.floor(min / 60)) + ":" + pad(Math.round(min % 60)); }
+  function endFocus(complete) {
+    clearInterval(S.focus.timerId);
+    const d = store.get();
+    const totalMin = Math.round((complete ? S.focus.total : S.focus.total - S.focus.remaining) / 60);
+    d.focusSessions.push({ id: uid(), user_id: d.user.id, slot_id: null, started_at: now(), ended_at: now(), planned_duration_min: Math.round(S.focus.total / 60), actual_duration_min: totalMin, status: complete ? "completed" : "aborted" });
+    store.persist();
+    $("#focusOverlay").classList.add("hidden");
+    S.focus.running = false;
+    S.focus.timerId = null;
+    persistToast(complete ? "专注完成，恭喜！🎉" : "已结束这段专注", complete);
+    renderMain();
+  }
+
+  /* ---------- Onboarding ------------------------------------------- */
+  let ob = { step: 0, interests: [], thought: "", draft: [] };
+  const OB_STEPS = 3;
+  function openOnboarding() {
+    const d = store.get();
+    ob = { step: 0, interests: d.user.interests.slice(), thought: "", draft: [] };
+    const o = $("#onboardingOverlay");
+    o.classList.remove("hidden");
     renderObStep();
   }
-  function closeOnboardingOverlay() {
-    const o = $("#onboardingOverlay");
-    o.classList.add("hidden"); o.innerHTML = "";
-  }
-  function obShell() {
-    return '<div class="onboarding-wrap"><div class="ob-top"><div class="ob-title"></div><button class="btn ghost sm" id="obClose">✕ 关闭</button></div>' +
-      '<div class="ob-progress"><div class="bar" style="width:0%"></div></div><div id="obContent"></div></div>';
-  }
-  function draftFromPath(path) {
-    return path.nodes.map((n) => ({ id: n.id, type: n.type, title: n.title, status: n.status }));
-  }
   function renderObStep() {
-    const wrap = $("#onboardingOverlay .onboarding-wrap");
-    $("#onboardingOverlay .ob-title").textContent = obStepTitle(ob.step);
-    $("#onboardingOverlay .ob-progress .bar").style.width = ((ob.step + 1) / OB_STEPS) * 100 + "%";
-    $("#obContent").innerHTML = obStepContent(ob.step);
-    bindObStep(ob.step);
+    const o = $("#onboardingOverlay");
+    const steps = ["兴趣板块", "人生想法", "路径草案"];
+    o.innerHTML = '<div class="overlay-wrap">' +
+      '<div class="ob-progress"><div class="bar" style="width:' + ((ob.step) / OB_STEPS) * 100 + '%"></div></div>' +
+      '<div class="ob-title" style="text-align:center">' + (ob.step + 1) + ". " + steps[ob.step] + "</div>" +
+      '<div class="ob-desc" style="text-align:center">' + obDesc() + "</div>" +
+      obStepContent() +
+      '<div class="ob-actions">' + (ob.step > 0 ? '<button class="btn ghost" id="obBack">← 上一步</button>' : "<div></div>") +
+      (ob.step < OB_STEPS - 1 ? '<button class="btn" id="obNext">下一步 →</button>' : '<button class="btn block" id="obFinish">亲手确认并开启旅程 ✨</button>') + "</div></div>";
+    bindOb();
   }
-  function obStepTitle(step) {
-    return [
-      "Step 1 · 了解”我“",
-      "Step 2 · 聊聊你的想法",
-      "Step 3 · 共创人生路径",
-      "Step 4 · 定目标",
-    ][step];
+  function obDesc() {
+    return ["选择你在意的兴趣板块（可多选）。你选了哪些，我就知道你在意什么。",
+      "写下你对人生的想法——哪怕很模糊。AI 不评判，只倾听。",
+      "这是 AI 根据你的兴趣与想法整理的路径草案（含「待定」占位）。在最后一步，你会亲手确认。"][ob.step];
   }
-  function obStepContent(step) {
-    if (step === 0) return obStepInterests();
-    if (step === 1) return obStepThought();
-    if (step === 2) return obStepDraft();
-    return obStepGoals();
+  function obStepContent() {
+    if (ob.step === 0) {
+      const grid = INTERESTS.map((i) => '<button class="interest-card' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-is="' + i.slug + '"><span class="emo">' + i.emoji + "</span>" + i.label + "</button>").join("");
+      return '<div class="interest-grid">' + grid + "</div>";
+    }
+    if (ob.step === 1) return '<textarea id="obThought" rows="6" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:14px" placeholder="例如：我想做点有实际影响的事，但方向还不确定……">' + esc(ob.thought) + "</textarea>";
+    return '<div class="ob-note" style="margin-top:0;background:var(--oxford-soft);color:var(--oxford)">以下为 AI 建议草稿，不代表你的最终路径。没想好的节点标为「待定」。</div>' +
+      (ob.draft.map((n, i) => '<div class="draft-node"><div class="dn-main"><div class="dn-type">' + esc(typeLabel[n.type] || n.type) + (n.status === "pending" ? ' · <span class="tag warn">待定</span>' : "") + '</div><div class="dn-title">' + esc(n.title) + "</div></div><div class='dn-actions'><button class='btn sm ghost' data-up=" + i + ">↑</button><button class='btn sm ghost' data-down=" + i + ">↓</button></div></div>").join(""));
   }
-  function obStepInterests() {
-    const chips = INTERESTS.map((i) => '<button class="chip' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-islug="' + i.slug + '">' + i.emoji + " " + i.label + "</button>").join("");
-    return (typeof onboardingIntroHTML === "function" ? onboardingIntroHTML() : "") +
-      '<h2 class="ob-title">选择一个或多个兴趣板块</h2><div class="ob-desc">你选了哪些，我就知道你大概在意什么。</div><div class="ob-block"><div class="chip-list">' + chips + "</div></div>" +
-      '<div class="ob-actions"><div></div><button class="btn" id="obNext0">继续 →</button></div>';
-  }
-  function obStepThought() {
-    return '<h2 class="ob-title">说说你对人生的想法（哪怕很模糊）</h2>' +
-      '<div class="ob-desc">AI 不评判，只倾听。</div>' +
-      '<div class="ob-block"><textarea id="obThought" rows="5" placeholder="比如：我想做点有影响的事，但现在还不太确定方向……">' + esc(ob.thought) + "</textarea></div>" +
-      '<div class="ob-actions"><button class="btn ghost" id="obBack1">← 上一步</button><button class="btn" id="obNext1">继续 →</button></div>';
-  }
-  function obStepDraft() {
-    const items = ob.draft.map((n, i) =>
-      '<div class="draft-node"><div class="dn-main"><div class="dn-type">' + esc(typeLabel(n.type)) + (n.status === "pending" ? ' <span class="tag warn">待定</span>' : "") + "</div><div class='dn-title'>" + esc(n.title) + "</div></div><div class='dn-actions'>" +
-      '<button class="btn sm ghost" data-draft-up="' + i + '">↑</button><button class="btn sm ghost" data-draft-sort="' + n.id + '" data-sortdown="' + i + '">↓</button>' +
-      '<button class="btn sm ghost" data-draft-order="' + n.id + '" data-order="' + i + '">排序</button>' +
-      '<button class="btn sm ghost" data-draft-del="' + n.id + '">删</button></div></div>'
-    ).join("");
-    return '<h2 class="ob-title">AI 提议的人生路径草案</h2>' +
-      '<div class="ob-desc">这是 AI 根据你的兴趣与想法整理的草案。你可以增删、排序；没想好的位置直接标「待定」，AI 不强求。</div>' +
-      '<div class="ob-block">' + (items || '<div class="empty">还没有节点</div>') + "</div>" +
-      '<div class="ob-actions"><button class="btn ghost" id="obAddDraft">+ 增补节点</button><button class="btn ghost" id="obBack2">← 上一步</button><button class="btn" id="obNext2">继续 →</button></div>';
-  }
-  function obStepGoals() {
-    const counts = { vision: 0, long_term_goal: 0, short_term_goal: 0 };
-    ob.draft.forEach((n) => counts[n.type] = (counts[n.type] || 0) + 1);
-    return '<h2 class="ob-title">最后，在路径上商定目标</h2>' +
-      '<div class="ob-desc">长期 / 短期目标都允许「待定」，AI 不催促。</div>' +
-      '<div class="ob-block"><ul style="line-height:2">' +
-      '<li>🎯 长期目标：<b>' + (counts.long_term_goal || 0) + '</b> 个</li>' +
-      '<li>🏁 短期目标：<b>' + (counts.short_term_goal || 0) + '</b> 个</li>' +
-      '<li>🧭 愿景节点：<b>' + (counts.vision || 0) + "</b> 个</li></ul>" +
-      '<div class="ob-note">这些会沉淀为你的<b>个人路径档案</b>，成为未来一切 AI 辅导的依据。现在或以后都可以修改。</div></div>' +
-      '<div class="ob-actions"><button class="btn ghost" id="obBack3">← 上一步</button><button class="btn violet" id="obFinish">完成，生成我的路径档案 ✨</button></div>';
-  }
-  function bindObStep(step) {
-    const wrap = $("#onboardingOverlay");
-    if (step === 0) {
-      wrap.querySelectorAll("[data-islug]").forEach((b) => (b.onclick = () => {
-        const s = b.dataset.islug;
+  function bindOb() {
+    if (ob.step === 0) {
+      document.querySelectorAll("[data-is]").forEach((b) => (b.onclick = () => {
+        const s = b.dataset.is;
         const ix = ob.interests.indexOf(s);
         if (ix >= 0) ob.interests.splice(ix, 1); else ob.interests.push(s);
         b.classList.toggle("selected");
       }));
-      $("#obNext0").onclick = () => { goObStep(1); };
     }
-    if (step === 1) {
-      $("#obBack1").onclick = () => goObStep(0);
-      $("#obNext1").onclick = () => { ob.thought = $("#obThought").value.trim(); generateDraft(); goObStep(2); };
+    if (ob.step === 1) {
+      const ta = $("#obThought");
+      if (ta) ta.addEventListener("input", (e) => (ob.thought = e.target.value));
     }
-    if (step === 2) {
-      $("#obBack2").onclick = () => goObStep(1);
-      $("#obAddDraft").onclick = obAddDraft;
-      $("#obNext2").onclick = () => goObStep(3);
-      wrap.querySelectorAll("[data-draft-del]").forEach((b) => (b.onclick = () => { ob.draft = ob.draft.filter((n) => n.id !== b.dataset.draftDel); renderObStep(); }));
-      wrap.querySelectorAll("[data-order]").forEach((b) => (b.onclick = () => obReorder(b.dataset.order)));
+    if (ob.step === 2) {
+      document.querySelectorAll("[data-up]").forEach((b) => (b.onclick = () => obMove(+b.dataset.up, -1)));
+      document.querySelectorAll("[data-down]").forEach((b) => (b.onclick = () => obMove(+b.dataset.down, +1)));
     }
-    if (step === 3) {
-      $("#obBack3").onclick = () => goObStep(2);
-      $("#obFinish").onclick = finishOnboarding;
-    }
-    $("#obClose").onclick = closeOnboardingOverlay;
+    const back = $("#obBack"); if (back) back.onclick = () => { ob.step--; renderObStep(); };
+    const next = $("#obNext"); if (next) next.onclick = () => { if (ob.step === 1) generateDraft(); ob.step++; renderObStep(); };
+    const finish = $("#obFinish"); if (finish) finish.onclick = finishOnboarding;
   }
-  function goObStep(n) {
-    ob.step = n;
+  function obMove(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= ob.draft.length) return;
+    const tmp = ob.draft[i]; ob.draft[i] = ob.draft[j]; ob.draft[j] = tmp;
     renderObStep();
   }
   function generateDraft() {
-    // 根据用户兴趣 + 想法生成初稿
-    const l3 = ["计算机 / AI", "数学", "科创 / 工程"].filter((k) => ob.interests.some((s) => INTERESTS.find((i) => i.slug === s && i.label === k)));
     const drafts = [];
-    const visionTitle = ob.thought ? ob.thought.slice(0, 24) : "成为能解决真实问题的人";
-    drafts.push({ id: uid(), type: "vision", title: visionTitle.replace(/[。，.!?`·]/g, "") || "成为更好的自己", status: "in_progress" });
-    drafts.push({ id: uid(), type: "long_term_goal", title: "高三前完成一个有影响的项目", status: "in_progress" });
+    const vt = (ob.thought || "成为能解决真实问题的人").slice(0, 24).replace(/[。，.!?`·]/g, "");
+    drafts.push({ type: "vision", title: vt || "成为更好的自己", status: "in_progress" });
+    drafts.push({ type: "long_term_goal", title: "高三前完成一个有影响的项目", status: "in_progress" });
     ob.interests.forEach((sl) => {
-      const label = INTERESTS.find((i) => i.slug === sl);
-      if (label) drafts.push({ id: uid(), type: "interest", title: label.label + "·兴趣板块", status: "in_progress" });
+      const i = INTERESTS.find((x) => x.slug === sl);
+      if (i) drafts.push({ type: "interest", title: i.label + "·兴趣板块", status: "in_progress" });
     });
-    drafts.push({ id: uid(), type: "short_term_goal", title: "期末选定一个方向课题", status: "pending" });
-    drafts.push({ id: uid(), type: "short_term_goal", title: "把期末总评提升一级", status: "in_progress" });
-    drafts.push({ id: uid(), type: "note", title: "升学方向：待定", status: "pending" });
-    ob.draft = drafts;
-  }
-  function obAddDraft() {
-    ob.draft.push({ id: uid(), type: "short_term_goal", title: "新增待定节点", status: "pending" });
-    renderObStep();
-  }
-  function obReorder(orderIdx) {
-    const n = ob.draft[orderIdx];
-    if (!n) return;
-    const next = ob.draft[orderIdx + 1];
-    if (next) { ob.draft[orderIdx] = next; ob.draft[orderIdx + 1] = n; renderObStep(); }
+    drafts.push({ type: "short_term_goal", title: "期末选定一个方向课题", status: "pending" });
+    drafts.push({ type: "long_term_goal", title: "升学方向：待定", status: "pending" });
+    ob.draft = (ob.draft && ob.draft.length) ? ob.draft : drafts;
   }
   function finishOnboarding() {
     const d = store.get();
+    if (!ob.draft.length) generateDraft();
+    d.path.nodes = ob.draft.map((n, i) => ({ id: uid(), parent_id: null, type: n.type, title: n.title, description: "", status: n.status, created_at: now(), updated_at: now(), order: i, source: "user", due_at: null, completed_at: n.status === "achieved" ? now() : null, ai_note: null }));
     d.user.interests = ob.interests.slice();
-    d.path.title = "我的高中三年";
-    d.path.nodes = ob.draft.map((n, idx) => makePathNode({ parent_id: null, type: n.type, title: n.title, description: "", status: n.status, order: idx, source: "user", completed_at: n.status === "achieved" ? now() : null }));
-    // 保留原本已达成的一个节点展示
+    d.isOnboardingCompleted = true;
     store.persist();
-    closeOnboardingOverlay();
-    navigate("life-path");
-    managerToast("✨ 你的个人路径档案已生成", "ok");
+    $("#onboardingOverlay").classList.add("hidden");
+    S.seg = "path";
+    setTab(0);
+    persistToast("🎉 欢迎！你的人生路径档案已就绪。", true);
   }
 
-  /* ---------- helpers ---------- */
-  function statusMeta(status) {
-    const map = {
-      in_progress: { label: "进行中", cls: "primary", done: "🟢" },
-      achieved: { label: "已达成", cls: "accent", done: "✅" },
-      pending: { label: "待定", cls: "warn", done: "⏳" },
-      abandoned: { label: "已放弃", cls: "danger", done: "🚫" },
-    };
-    return map[status] || { label: status, cls: "", done: "•" };
-  }
-  function typeLabel(t) {
-    const map = { vision: "愿景", long_term_goal: "长期目标", short_term_goal: "短期目标", task: "任务", interest: "兴趣板块", note: "备注" };
-    return map[t] || t;
-  }
-  function emptyBox(emo, text) { return '<div class="empty"><div class="emo">' + emo + "</div>" + esc(text) + "</div>"; }
-
-  function bindDataGo() {
-    document.querySelectorAll("[data-go]").forEach((el) => (el.onclick = () => navigate(el.dataset.go)));
-  }
-
-  /* ---------- init ---------- */
+  /* ---------- Init ---------- */
   function init() {
     renderShell();
-    bindSidebar();
-    ensureTimer();
-    if (!store.get() || store.get().path.nodes.length === 0) {
-      // 首次为空可自动弹 onboarding
-    }
-    const initial = (location.hash || "#/dashboard").replace("#/", "").split("/")[0] || "dashboard";
-    navigate(initial);
-    window.addEventListener("hashchange", () => {
-      const r = (location.hash || "#/dashboard").replace("#/", "").split("/")[0] || "dashboard";
-      if (r !== state.route) navigate(r);
-    });
+    const d = store.get();
+    if (!d.isOnboardingCompleted) { openOnboarding(); return; }
+    setTab(0);
   }
-
   window.addEventListener("DOMContentLoaded", init);
-  BNDS.ui = { navigate, openOnboarding, toast, renderLifePath, renderDashboard };
 })();

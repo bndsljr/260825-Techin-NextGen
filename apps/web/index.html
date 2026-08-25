@@ -8,45 +8,35 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <!-- 顶栏（移动端显示） -->
   <header class="topbar">
     <button class="menu-btn" id="menuBtn" aria-label="打开导航">☰</button>
-    <div class="brand">
-      <span class="brand-mark">BNDS</span>
-      <span class="brand-name">十一校园助手</span>
-    </div>
+    <div class="brand"><span class="brand-mark">BNDS</span><span class="brand-name">十一校园助手</span></div>
     <div class="topbar-user" id="topbarUser"></div>
   </header>
 
-  <!-- 侧边导航 -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-head">
       <span class="brand-mark">BNDS</span>
       <span class="brand-name">十一校园助手</span>
     </div>
-    <ul class="nav-list">
-      <li><a href="#/dashboard" data-route="dashboard" class="nav-link"><span class="nav-ico">🖥️</span><span>概览 Dashboard</span></a></li>
-      <li><a href="#/schedule" data-route="schedule" class="nav-link"><span class="nav-ico">📅</span><span>日程课表</span></a></li>
-      <li><a href="#/focus" data-route="focus" class="nav-link"><span class="nav-ico">🎯</span><span>专注模式</span></a></li>
-      <li><a href="#/mentor" data-route="mentor" class="nav-link"><span class="nav-ico">🤖</span><span>AI 辅导</span></a></li>
-      <li><a href="#/life-path" data-route="life-path" class="nav-link"><span class="nav-ico">🧭</span><span>人生路径</span></a></li>
-      <li><a href="#/onboarding" data-route="onboarding" class="nav-link"><span class="nav-ico">✨</span><span>Onboarding</span></a></li>
+    <div class="nav-label">主界面</div>
+    <ul class="nav-list" id="navList">
+      <li><a href="javascript:void(0)" data-tab="0" class="nav-link active"><span class="nav-ico">🙋</span><span class="nav-text">我</span></a></li>
+      <li><a href="javascript:void(0)" data-tab="1" class="nav-link"><span class="nav-ico">📅</span><span class="nav-text">今日</span></a></li>
+      <li><a href="javascript:void(0)" data-tab="2" class="nav-link"><span class="nav-ico">🧑‍🏫</span><span class="nav-text">导师</span></a></li>
     </ul>
     <div class="sidebar-foot" id="sidebarFoot"></div>
   </nav>
 
-  <!-- 背景遮罩（移动端） -->
   <div class="backdrop" id="backdrop"></div>
 
-  <!-- 主内容区 -->
   <main class="main" id="main">
     <section id="view" class="view"></section>
   </main>
 
-  <!-- Onboarding 全屏向导容器 -->
-  <div id="onboardingOverlay" class="onboarding-overlay hidden"></div>
-
-  <!-- 全局 toast -->
+  <div id="onboardingOverlay" class="overlay hidden"></div>
+  <div id="nodeEditorOverlay" class="overlay hidden"></div>
+  <div id="focusOverlay" class="overlay full hidden"></div>
   <div id="toast" class="toast hidden"></div>
 
   <script src="js/data.js"></script>
