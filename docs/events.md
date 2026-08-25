@@ -36,8 +36,8 @@
 | `focus.ended` | `{ session_id, duration }` | focus | 客户端、ai |
 | `assessment.new` | `{ assessment_id }` | data-ingest | 客户端、ai |
 | `grade.new` | `{ grade_id }` | data-ingest | 客户端、ai |
-| `coach.requested` | `{ request_id, context }` | 客户端 | ai |
-| `coach.reply` | `{ request_id, chunk }` | ai → apps/api | 客户端 |
+| `mentor.requested` | `{ request_id, context }` | 客户端 | ai |
+| `mentor.reply` | `{ request_id, chunk }` | ai → apps/api | 客户端 |
 
 ---
 
@@ -60,8 +60,8 @@
   → path 领域模型生成 LifePath 草案
   → 用户与 AI 共创：POST /life-path/ai-propose → 事件 goal.proposed
   → 用户接受 → 事件 goal.accepted → 节点 status 变 in_progress
-  → 客户端触发 POST /ai/coach（携带 path+数据）
-  → 事件 coach.requested → ai 生成 → 事件 coach.reply → 客户端流式展示
+  → 客户端触发 POST /ai/mentor（携带 path+数据）
+  → 事件 mentor.requested → ai 生成 → 事件 mentor.reply → 客户端流式展示
 ```
 
 ---

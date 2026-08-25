@@ -20,7 +20,7 @@
 | 输入 | `LifePath`（主轴） | 来自 `packages/path` |
 | 输入 | `FormativeAssessment[]` / `Grade[]`（脱敏后） | 来自 `apps/api` 数据层 |
 | 输入 | `ScheduleSlot[]`（近期日程） | 来自 `scheduler` |
-| 输入 | 用户问题/情境 `{ focus }` | 来自客户端 `POST /ai/coach` |
+| 输入 | 用户问题/情境 `{ focus }` | 来自客户端 `POST /ai/mentor` |
 | 输出 | `{ summary, suggestions[], open_questions[], decision_required:false }` | → 客户端 |
 
 ---
@@ -43,9 +43,9 @@
 
 | 接口 | 说明 |
 |------|------|
-| `POST /ai/coach` | 一次性返回建议 |
-| `POST /ai/coach/stream` | SSE 流式返回分点建议 |
-| `GET /ai/coach/history` | 历史记录 |
+| `POST /ai/mentor` | 一次性返回建议 |
+| `POST /ai/mentor/stream` | SSE 流式返回分点建议 |
+| `GET /ai/mentor/history` | 历史记录 |
 
 ---
 
@@ -59,8 +59,8 @@
 
 ## 6. 事件与约束
 
-- 订阅：`coach.requested`、`goal.accepted`、`assessment.new`、`grade.new`、`path.updated`
-- 发布：`goal.proposed`（**建议稿**，必须用户确认）、`coach.reply`
+- 订阅：`mentor.requested`、`goal.accepted`、`assessment.new`、`grade.new`、`path.updated`
+- 发布：`goal.proposed`（**建议稿**，必须用户确认）、`mentor.reply`
 
 ### 🚫 红线（辅助不越位）
 - AI **不得**直接修改 `LifePath`/`LifePathNode` 的 `status`。

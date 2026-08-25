@@ -115,13 +115,13 @@ PUT /life-path
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `POST` | `/ai/coach` | 发起一次辅导：后端聚合 path+评价+成绩 → 交给 `packages/ai` → 返回建议 |
-| `POST` | `/ai/coach/stream` | SSE 流式返回分点建议 |
-| `GET`  | `/ai/coach/history` | 历史辅导记录 |
+| `POST` | `/ai/mentor` | 发起一次辅导：后端聚合 path+评价+成绩 → 交给 `packages/ai` → 返回建议 |
+| `POST` | `/ai/mentor/stream` | SSE 流式返回分点建议 |
+| `GET`  | `/ai/mentor/history` | 历史辅导记录 |
 
-`/ai/coach` 请求：
+`/ai/mentor` 请求：
 ```jsonc
-POST /ai/coach
+POST /ai/mentor
 {
   "context": {
     "path_id": "uuid",
@@ -157,7 +157,7 @@ POST /ai/coach
 | `data.synced` | server→client | 课表/评价/成绩更新，携带 `resource`, `ids` |
 | `schedule.updated` | server→client | 课表变更 |
 | `focus.started` / `focus.ended` | server→client | 专注会话状态 |
-| `coach.reply` | server→client | AI 流式建议片段 |
+| `mentor.reply` | server→client | AI 流式建议片段 |
 | `client.action` | client→server | 用户在客户端做出的决策（用于记录与同步） |
 
 客户端收到 `data.synced` 后，按需拉取对应资源并刷新。
