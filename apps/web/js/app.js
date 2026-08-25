@@ -677,12 +677,8 @@
       const grid = INTERESTS.map((i) => '<button class="interest-card' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-is="' + i.slug + '"><span class="emo">' + i.emoji + "</span>" + i.label + "</button>").join("");
       return '<div class="interest-grid">' + grid + "</div>";
     }
-  function obStepContent() {
-    if (ob.step === 0) {
-      const grid = INTERESTS.map((i) => '<button class="interest-card' + (ob.interests.includes(i.slug) ? " selected" : "") + '" data-is="' + i.slug + '"><span class="emo">' + i.emoji + "</span>" + i.label + "</button>").join("");
-      return '<div class="interest-grid">' + grid + "</div>";
-    }
     if (ob.step === 1) return '<textarea id="obThought" rows="6" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:14px" placeholder="例如：我想动手做出能解决真实校园场景痛点的硬件或AI作品……">' + esc(ob.thought) + "</textarea>";
+
     return '<div class="ob-note" style="margin-top:0;background:var(--oxford-soft);color:var(--oxford)">🤖 以下为 AI 结合你的 32 节周课表（含周五容光楼工程选修、数学Ⅲ-4等）智能推导的层级规划草案。</div>' +
       '<div style="max-height:48vh;overflow-y:auto;margin-top:10px;padding:4px">' +
       (ob.draft.map((n, i) => {
